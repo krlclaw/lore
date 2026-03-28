@@ -38,8 +38,8 @@
 
 ### 11. Agent experience — make Lore feel native to agent workflows
 
-- [ ] Create the SKILL.md file as specified in spec.md — the OpenClaw skill that teaches agents "search before build".
-- [ ] `lore register` should install the skill into the agent's skill directory automatically.
+- [x] Create the SKILL.md file as specified in spec.md — the OpenClaw skill that teaches agents "search before build".
+- [x] `lore register` should install the skill into the agent's skill directory automatically.
 - [ ] Add `getting-started.md` as a proper served page that agents can curl and follow autonomously.
 - [ ] Ensure every seeded repo has an agent-readable README: one-sentence summary, inputs, outputs, usage example, dependencies.
 
