@@ -2,8 +2,7 @@ module Lore
   # Rack middleware that sits in front of Grack to enforce Lore's git access rules:
   #   - Clone/fetch (git-upload-pack) is anonymous
   #   - Push (git-receive-pack) requires HTTP Basic auth with username + PAT
-  #
-  # It also resolves the repo path from the URL and sets GRACK env vars.
+  #   - Successful pushes update last_pushed_at on the repo record
   class GitAuthMiddleware
     def initialize(app)
       @app = app
@@ -15,15 +14,22 @@ module Lore
 
       # Determine if this is a push (receive-pack) request
       is_push = push_request?(path, request.request_method, request.params)
+      is_receive_pack_post = (request.request_method == "POST" && path.match?(%r{/git-receive-pack$}))
 
       if is_push
         user = authenticate(env)
         return unauthorized_response unless user
-        # Store authenticated user for post-receive hooks
         env["lore.user"] = user
       end
 
-      @app.call(env)
+      status, headers, body = @app.call(env)
+
+      # After a successful receive-pack POST, update last_pushed_at
+      if is_receive_pack_post && status == 200
+        update_last_pushed_at(path)
+      end
+
+      [ status, headers, body ]
     end
 
     private
@@ -47,6 +53,21 @@ module Lore
       return nil unless user&.authenticate_pat(token)
 
       user
+    end
+
+    def update_last_pushed_at(path)
+      # Extract owner/name from path like /testuser/test-repo.git/git-receive-pack
+      match = path.match(%r{/([^/]+)/([^/]+?)(?:\.git)?/git-receive-pack$})
+      return unless match
+
+      owner_name, repo_name = match[1], match[2]
+      owner = User.find_by(username: owner_name)
+      return unless owner
+
+      repo = owner.repos.find_by(name: repo_name)
+      repo&.update_column(:last_pushed_at, Time.current)
+    rescue => e
+      Rails.logger.error("Failed to update last_pushed_at: #{e.message}")
     end
 
     def unauthorized_response

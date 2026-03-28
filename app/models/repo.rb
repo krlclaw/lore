@@ -41,6 +41,8 @@ class Repo < ApplicationRecord
     system("git", "init", "--bare", path, exception: true)
     # Set HEAD to point to refs/heads/main
     File.write(File.join(path, "HEAD"), "ref: refs/heads/main\n")
+    # Explicitly deny non-fast-forward pushes
+    system("git", "-C", path, "config", "receive.denyNonFastForwards", "true", exception: true)
   end
 
   def self.create_with_bare_repo!(owner:, name:, description: "", tags: [])

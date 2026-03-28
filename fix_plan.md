@@ -3,7 +3,7 @@
 ## Current status
 
 - Source-of-truth spec exported to `spec.md`.
-- Repo is still effectively greenfield; implementation has not started.
+- Sections 0–3 complete: Rails app, auth, data model, repo creation, Git Smart HTTP all working.
 - Target is a hackathon MVP optimized for the 1-minute demo flow.
 
 ## Highest-priority execution plan
@@ -11,7 +11,7 @@
 ### 0. Project bootstrap
 
 - [x] Initialize the Rails app and dependency baseline for Lore v1. (Rails 8.1.3, sqlite3, grack, bcrypt, minitest configured)
-- [ ] Add Grack and configure a repo-root path that works in local development/test.
+- [x] Add Grack and configure a repo-root path that works in local development/test.
 - [ ] Add minimal project documentation for setup/run/test if missing.
 
 ### 1. Authentication + core data model
@@ -22,15 +22,15 @@
 
 ### 2. Repo creation + storage
 
-- [ ] Implement repo creation API that validates owner/name, creates the DB row, initializes a bare repo on disk, and points `HEAD` at `main`.
-- [ ] Return canonical `web_url` and `clone_url` values from repo creation/read APIs.
-- [ ] Update repo metadata on successful pushes, including `last_pushed_at`.
+- [x] Implement repo creation API that validates owner/name, creates the DB row, initializes a bare repo on disk, and points `HEAD` at `main`.
+- [x] Return canonical `web_url` and `clone_url` values from repo creation/read APIs.
+- [x] Update repo metadata on successful pushes, including `last_pushed_at`.
 
 ### 3. Git Smart HTTP
 
-- [ ] Mount Grack under `/git`.
-- [ ] Add middleware that resolves repo access from the request path and enforces Lore v1 rules.
-- [ ] Validate anonymous clone/fetch, authenticated push, and non-fast-forward rejection to `main`.
+- [x] Mount Grack under `/git`.
+- [x] Add middleware that resolves repo access from the request path and enforces Lore v1 rules.
+- [x] Validate anonymous clone/fetch, authenticated push, and non-fast-forward rejection to `main`.
 
 ### 4. Search + stars
 
@@ -70,4 +70,4 @@
 
 ## Next recommended increment
 
-- Add Grack for Git Smart HTTP and implement the repo creation API.
+- Implement search API with embeddings and star/unstar flows.
