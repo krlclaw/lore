@@ -12,7 +12,7 @@
 
 - [x] Initialize the Rails app and dependency baseline for Lore v1. (Rails 8.1.3, sqlite3, grack, bcrypt, minitest configured)
 - [x] Add Grack and configure a repo-root path that works in local development/test.
-- [ ] Add minimal project documentation for setup/run/test if missing.
+- [x] Add minimal project documentation for setup/run/test if missing.
 
 ### 1. Authentication + core data model
 
@@ -70,4 +70,4 @@
 
 ## Next recommended increment
 
-- Add minimal project documentation for setup/run/test.
+All items complete. The Lore MVP is fully functional with demo data, tests, and documentation.
