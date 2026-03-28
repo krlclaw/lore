@@ -18,6 +18,22 @@ module Api
       end
     end
 
+    # GET /api/users/:username
+    def show
+      user = User.find_by!(username: params[:username])
+      repos = user.repos
+      render json: {
+        user: {
+          username: user.username,
+          repos_count: repos.count,
+          total_stars: repos.sum(:stars_count),
+          created_at: user.created_at.iso8601
+        }
+      }
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "User not found" }, status: :not_found
+    end
+
     # GET /api/users/:username/repos
     def repos
       user = User.find_by!(username: params[:username])

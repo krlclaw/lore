@@ -14,7 +14,8 @@ Rails.application.routes.draw do
     resources :users, only: [:create], param: :username do
       get :repos, on: :member
     end
-    resources :repos, only: [:create] do
+    get "users/:username", to: "users#show", constraints: { username: /[a-z][a-z0-9-]*/ }
+    resources :repos, only: [:create, :index] do
       collection do
         get "search", action: :search
         get ":owner/:name", action: :show, as: :show,

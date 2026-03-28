@@ -2,6 +2,30 @@ module Api
   class ReposController < BaseController
     before_action :require_authentication!, only: [:create, :star, :unstar]
 
+    # GET /api/repos
+    def index
+      page = [params[:page].to_i, 1].max
+      per = [[params[:per_page].to_i, 1].max, 50].min
+      per = 20 if params[:per_page].blank?
+
+      sort = case params[:sort]
+             when "stars" then { stars_count: :desc, created_at: :desc }
+             when "recent" then Arel.sql("CASE WHEN last_pushed_at IS NULL THEN 1 ELSE 0 END, last_pushed_at DESC")
+             else { stars_count: :desc, created_at: :desc }
+             end
+
+      repos = Repo.includes(:owner).order(sort)
+      total = repos.count
+      repos = repos.offset((page - 1) * per).limit(per)
+
+      render json: {
+        repos: repos.map { |r| full_repo_json(r) },
+        total: total,
+        page: page,
+        per_page: per
+      }
+    end
+
     # POST /api/repos
     def create
       repo = Repo.create_with_bare_repo!(
