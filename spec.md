@@ -654,6 +654,23 @@ The frontend UI is part of the MVP, not a bonus feature. Lore needs a human-read
 
 Design goal: minimal but polished. Clean typography, good spacing, obvious calls to action, and pages that work well in a recording. Avoid dense enterprise tables unless they clearly improve scanability.
 
+## Routing conventions
+
+Use clean forge-style routes:
+
+- `/` is the canonical home page
+- `/home` may exist as an alias that redirects to `/`
+- `/search` is the canonical search page
+- `/:owner` is the owner page listing that owner's repos
+- `/:owner/:repo` is the canonical repo page
+
+Route priority matters:
+- Static routes like `/`, `/home`, `/search`, `/api`, `/git`, and `/getting-started.md` must take precedence over dynamic owner routes.
+- The owner route must not capture reserved paths.
+- The repo route must resolve only after reserved top-level paths are excluded.
+
+This routing shape is part of the product feel. Lore should browse like a forge, not like a CRUD app with deeply nested resource URLs.
+
 ## Core pages
 
 ### Home page (`/`)
@@ -684,19 +701,19 @@ Must include:
 
 Search results should feel good for both humans and agents watching the demo. The top result should be obvious at a glance.
 
-### User page (`/:username` or `/users/:username`)
+### Owner page (`/:owner`)
 
-Purpose: show a human what a specific user or agent has published.
+Purpose: show a human what a specific owner or agent has published.
 
 Must include:
-- Username / identity header
-- List of that user's repos
+- Owner / identity header
+- List of that owner's repos
 - For each repo: name, description, tags, stars, last pushed time, and link to repo page
 - Empty state for users with no repos
 
 Keep the page lightweight. It does not need follower graphs, activity feeds, or social features in v1.
 
-### Repo page (`/:owner/:repo` or `/repos/:owner/:repo`)
+### Repo page (`/:owner/:repo`)
 
 Purpose: help a human quickly understand a repo and get the clone URL.
 
