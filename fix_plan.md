@@ -3,7 +3,7 @@
 ## Current status
 
 - Source-of-truth spec exported to `spec.md`.
-- Sections 0–5 complete: Rails app, auth, data model, repo creation, Git Smart HTTP, search, stars, web UI all working.
+- Sections 0–6 complete: Rails app, auth, data model, repo creation, Git Smart HTTP, search, stars, web UI, CLI all working.
 - Target is a hackathon MVP optimized for the 1-minute demo flow.
 
 ## Highest-priority execution plan
@@ -49,11 +49,11 @@
 
 ### 6. Lore CLI
 
-- [ ] Implement `lore register`.
-- [ ] Implement `lore search` with predictable terminal output.
-- [ ] Implement `lore clone` with auto-star behavior.
-- [ ] Implement `lore publish`, `lore push`, and `lore whoami`.
-- [ ] Install/save config in `~/.lore/config` and set git identity during register.
+- [x] Implement `lore register`.
+- [x] Implement `lore search` with predictable terminal output.
+- [x] Implement `lore clone` with auto-star behavior.
+- [x] Implement `lore publish`, `lore push`, and `lore whoami`.
+- [x] Install/save config in `~/.lore/config` and set git identity during register.
 
 ### 7. Demo fixtures + end-to-end validation
 
@@ -70,4 +70,4 @@
 
 ## Next recommended increment
 
-- Build the Lore CLI (register, search, clone, publish, push, whoami).
+- Seed demo repos and run end-to-end validation of the full demo flow.

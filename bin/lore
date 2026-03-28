@@ -1,0 +1,269 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Lore CLI — thin wrapper around the Lore HTTP API and git.
+# Config: ~/.lore/config (LORE_TOKEN, LORE_HOST, LORE_USERNAME)
+
+CONFIG_DIR="$HOME/.lore"
+CONFIG_FILE="$CONFIG_DIR/config"
+
+# ── Config helpers ──
+
+load_config() {
+  if [[ -f "$CONFIG_FILE" ]]; then
+    # shellcheck disable=SC1090
+    source "$CONFIG_FILE"
+  fi
+  LORE_HOST="${LORE_HOST:-http://localhost:3000}"
+}
+
+ensure_auth() {
+  load_config
+  if [[ -z "${LORE_TOKEN:-}" ]]; then
+    echo "Error: not logged in. Run: lore register <username>" >&2
+    exit 1
+  fi
+}
+
+# ── Commands ──
+
+cmd_register() {
+  local username="${1:-}"
+  if [[ -z "$username" ]]; then
+    echo "Usage: lore register <username>" >&2
+    exit 1
+  fi
+
+  load_config
+
+  local resp
+  resp=$(curl -sf -X POST "$LORE_HOST/api/users" \
+    -H "Content-Type: application/json" \
+    -d "{\"username\": \"$username\"}" 2>&1) || {
+    echo "Error: registration failed." >&2
+    echo "$resp" >&2
+    exit 1
+  }
+
+  local token
+  token=$(echo "$resp" | grep -o '"pat":"[^"]*"' | cut -d'"' -f4)
+
+  if [[ -z "$token" ]]; then
+    echo "Error: could not parse token from response." >&2
+    echo "$resp" >&2
+    exit 1
+  fi
+
+  # Save config
+  mkdir -p "$CONFIG_DIR"
+  cat > "$CONFIG_FILE" <<EOF
+LORE_TOKEN=$token
+LORE_HOST=$LORE_HOST
+LORE_USERNAME=$username
+EOF
+
+  echo "Registered as $username"
+  echo "Token saved to $CONFIG_FILE"
+  echo ""
+  echo "Your PAT (save this — it won't be shown again):"
+  echo "  $token"
+}
+
+cmd_search() {
+  local query="${*}"
+  if [[ -z "$query" ]]; then
+    echo "Usage: lore search <query>" >&2
+    exit 1
+  fi
+
+  load_config
+
+  local encoded_query
+  encoded_query=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$query'))" 2>/dev/null || echo "$query")
+
+  local resp
+  resp=$(curl -sf "$LORE_HOST/api/repos/search?q=$encoded_query" 2>&1) || {
+    echo "Error: search failed." >&2
+    exit 1
+  }
+
+  # Parse and display results using ruby (available since we're in a Rails project)
+  echo "$resp" | ruby -rjson -e '
+    data = JSON.parse(STDIN.read)
+    repos = data["repos"]
+    if repos.empty?
+      puts "No results found."
+      exit
+    end
+    repos.each_with_index do |r, i|
+      stars = r["stars"] || 0
+      score = ((r["similarity_score"] || 0) * 100).round(1)
+      line = "#{i + 1}. #{r["owner"]}/#{r["name"]}"
+      line += " \u2b50#{stars}" if stars > 0
+      line += "  \u2014 #{r["description"]}" if r["description"] && !r["description"].empty?
+      line += " (#{score}%)"
+      puts line
+    end
+  '
+}
+
+cmd_clone() {
+  local repo_path="${1:-}"
+  if [[ -z "$repo_path" ]]; then
+    echo "Usage: lore clone <owner/repo>" >&2
+    exit 1
+  fi
+
+  load_config
+
+  local owner repo
+  owner=$(echo "$repo_path" | cut -d'/' -f1)
+  repo=$(echo "$repo_path" | cut -d'/' -f2)
+
+  if [[ -z "$owner" || -z "$repo" ]]; then
+    echo "Error: expected format owner/repo" >&2
+    exit 1
+  fi
+
+  local clone_url="$LORE_HOST/git/$owner/$repo.git"
+  echo "Cloning $owner/$repo..."
+  git clone "$clone_url" "$repo" || {
+    echo "Error: clone failed." >&2
+    exit 1
+  }
+
+  # Auto-star if authenticated
+  if [[ -n "${LORE_TOKEN:-}" ]]; then
+    curl -sf -X POST "$LORE_HOST/api/repos/$owner/$repo/star" \
+      -H "Authorization: Bearer $LORE_TOKEN" > /dev/null 2>&1 && \
+      echo "Starred $owner/$repo" || true
+  fi
+}
+
+cmd_publish() {
+  local name="${1:-}"
+  local description="${2:-}"
+  local tags_str="${3:-}"
+
+  if [[ -z "$name" ]]; then
+    echo "Usage: lore publish <name> [description] [--tags tag1,tag2]" >&2
+    exit 1
+  fi
+
+  ensure_auth
+
+  # Parse --tags flag
+  local tags="[]"
+  if [[ -n "$tags_str" ]]; then
+    tags=$(echo "$tags_str" | tr ',' '\n' | ruby -rjson -e 'puts STDIN.readlines.map(&:strip).reject(&:empty?).to_json')
+  fi
+
+  local body
+  body=$(ruby -rjson -e "puts({name: '$name', description: '$description', tags: $tags}.to_json)")
+
+  local resp
+  resp=$(curl -sf -X POST "$LORE_HOST/api/repos" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $LORE_TOKEN" \
+    -d "$body" 2>&1) || {
+    echo "Error: publish failed." >&2
+    echo "$resp" >&2
+    exit 1
+  }
+
+  local clone_url
+  clone_url=$(echo "$resp" | ruby -rjson -e 'puts JSON.parse(STDIN.read)["repo"]["clone_url"]')
+
+  echo "Created repo: $LORE_USERNAME/$name"
+  echo "Clone URL: $clone_url"
+
+  # If we're in a git repo, add remote and push
+  if git rev-parse --git-dir > /dev/null 2>&1; then
+    local push_url
+    push_url=$(echo "$clone_url" | sed "s|://|://$LORE_USERNAME:$LORE_TOKEN@|")
+    git remote add lore "$push_url" 2>/dev/null || git remote set-url lore "$push_url"
+    echo "Pushing to lore..."
+    git push lore main 2>&1 || echo "Push skipped (no commits or branch not ready)."
+  fi
+}
+
+cmd_push() {
+  ensure_auth
+
+  echo "Pulling with rebase..."
+  git pull --rebase origin main 2>&1 || true
+
+  echo "Pushing to origin main..."
+  git push origin main 2>&1 || {
+    echo "Error: push failed." >&2
+    exit 1
+  }
+}
+
+cmd_whoami() {
+  ensure_auth
+
+  local masked_token="${LORE_TOKEN:0:12}...${LORE_TOKEN: -4}"
+  echo "Username: $LORE_USERNAME"
+  echo "Token:    $masked_token"
+  echo "Host:     $LORE_HOST"
+}
+
+cmd_star() {
+  local repo_path="${1:-}"
+  if [[ -z "$repo_path" ]]; then
+    echo "Usage: lore star <owner/repo>" >&2
+    exit 1
+  fi
+
+  ensure_auth
+
+  local owner repo
+  owner=$(echo "$repo_path" | cut -d'/' -f1)
+  repo=$(echo "$repo_path" | cut -d'/' -f2)
+
+  curl -sf -X POST "$LORE_HOST/api/repos/$owner/$repo/star" \
+    -H "Authorization: Bearer $LORE_TOKEN" > /dev/null 2>&1 && \
+    echo "Starred $owner/$repo" || {
+    echo "Error: star failed." >&2
+    exit 1
+  }
+}
+
+cmd_help() {
+  cat <<'HELP'
+lore — CLI for the Lore git forge
+
+Commands:
+  lore register <username>     Create account, save token
+  lore search <query>          Semantic search for repos
+  lore clone <owner/repo>      Clone repo and auto-star
+  lore publish <name> [desc] [--tags t1,t2]  Create and push a new repo
+  lore push                    Pull --rebase then push to origin/main
+  lore star <owner/repo>       Star a repo
+  lore whoami                  Show current identity
+
+Config: ~/.lore/config
+HELP
+}
+
+# ── Main dispatch ──
+
+cmd="${1:-help}"
+shift || true
+
+case "$cmd" in
+  register)        cmd_register "$@" ;;
+  search)          cmd_search "$@" ;;
+  clone)           cmd_clone "$@" ;;
+  publish)         cmd_publish "$@" ;;
+  push)            cmd_push "$@" ;;
+  whoami)          cmd_whoami "$@" ;;
+  star)            cmd_star "$@" ;;
+  help|--help|-h)  cmd_help ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    cmd_help
+    exit 1
+    ;;
+esac
