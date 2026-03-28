@@ -136,7 +136,7 @@ cmd_search() {
     return
   fi
 
-  local query="${*}"
+  local query="${*:-}"
   if [[ -z "$query" ]]; then
     echo -e "Usage: ${CYAN}lore search${RESET} ${DIM}<query>${RESET}" >&2
     exit 1

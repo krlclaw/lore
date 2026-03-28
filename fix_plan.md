@@ -2,7 +2,7 @@
 
 ## Current status
 
-- Phase 1 + 2 complete. 51 commits, 38 tests, 108 assertions passing.
+- Phase 1 + 2 complete. 52 tests, 216 assertions passing.
 - 12 seed repos, 4 users, working CLI, web UI, API, Git Smart HTTP.
 - Phase 3: close remaining gaps, harden the demo, make it bulletproof.
 
@@ -48,10 +48,10 @@ The current UI is functional but safe. It needs personality and polish to look l
 
 ### 18. Test coverage gaps
 
-- [ ] Test CLI output format matches expected patterns.
-- [ ] Test star counter cache stays consistent after star/unstar.
-- [ ] Test seed data creates exactly the expected repos with correct star counts.
-- [ ] Test rate limiting headers are present on API responses.
+- [x] Test CLI output format matches expected patterns. ✓ 6 tests: help lists all commands, search/clone no-args show usage, register/search --help show examples, unknown command errors.
+- [x] Test star counter cache stays consistent after star/unstar. ✓ Tests star/unstar cycle including duplicate star idempotency and double-unstar stays at 0.
+- [x] Test seed data creates exactly the expected repos with correct star counts. ✓ Runs seeds in test env, verifies all 12 repos with exact display_stars, all 4 users.
+- [x] Test rate limiting headers are present on API responses. ✓ Verifies X-RateLimit-Limit and X-RateLimit-Remaining on both anonymous and authenticated requests.
 
 ### 19. Production-readiness for demo day
 
