@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_28_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_28_210454) do
   create_table "repos", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "description", default: ""
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_28_000003) do
     t.string "name", null: false
     t.integer "owner_id", null: false
     t.string "path", null: false
+    t.integer "stars_count", default: 0, null: false
     t.text "tags", default: "[]"
     t.datetime "updated_at", null: false
     t.index ["owner_id", "name"], name: "index_repos_on_owner_id_and_name", unique: true
