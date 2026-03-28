@@ -16,9 +16,9 @@
 
 ### 1. Authentication + core data model
 
-- [ ] Implement `User`, `Repo`, and `Star` models with the required constraints and validations.
-- [ ] Implement PAT issuance on user creation with digest-only storage.
-- [ ] Add auth helpers for bearer PAT API auth and Basic auth for git transport.
+- [x] Implement `User`, `Repo`, and `Star` models with the required constraints and validations.
+- [x] Implement PAT issuance on user creation with digest-only storage.
+- [x] Add auth helpers for bearer PAT API auth and Basic auth for git transport.
 
 ### 2. Repo creation + storage
 
@@ -70,4 +70,4 @@
 
 ## Next recommended increment
 
-- Bootstrap the Rails app and commit the initial runnable project skeleton with Grack-ready dependency planning.
+- Add Grack for Git Smart HTTP and implement the repo creation API.
