@@ -52,3 +52,5 @@ group :development do
   gem "web-console"
 end
 gem "redcarpet"
+
+gem "webrick", "~> 1.9"

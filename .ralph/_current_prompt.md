@@ -1,7 +1,7 @@
-You are running iteration 3 of an autonomous Ralph Loop build.
+You are running iteration 4 of an autonomous Ralph Loop build.
 
 ## Previous iteration result
-COMPLETED: UI overhaul — SVG hero icons, golden star display, search input glow animation, prominent copy button, vibrant tag hovers, tighter typography, consistent star counts across homepage and owner pages
+COMPLETED: CLI hardening — search output matches spec format (numbered, ⭐N, description on one line, top 10), clone prints "Cloned and starred" confirmation, push handles missing remote, register validates server reachability, all commands support --help with usage examples
 
 ## Your contract (READ THIS CAREFULLY)
 

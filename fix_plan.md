@@ -41,10 +41,10 @@ The current UI is functional but safe. It needs personality and polish to look l
 
 ### 17. Git transport edge cases
 
-- [ ] Verify that `git clone http://localhost:3000/git/lore-agent/slack-notify.git` works anonymously (no auth needed).
-- [ ] Verify authenticated push updates `last_pushed_at` correctly.
-- [ ] Ensure a clear error message when pushing to a non-existent repo.
-- [ ] Test that repos with multiple commits show correct HEAD after push.
+- [x] Verify that `git clone http://localhost:3000/git/lore-agent/slack-notify.git` works anonymously (no auth needed). ✓ Integration test via WEBrick confirms anonymous HTTP clone works.
+- [x] Verify authenticated push updates `last_pushed_at` correctly. ✓ Test confirms last_pushed_at is set after authenticated HTTP push.
+- [x] Ensure a clear error message when pushing to a non-existent repo. ✓ Test confirms push to non-existent repo fails (git returns non-zero exit).
+- [x] Test that repos with multiple commits show correct HEAD after push. ✓ Test confirms 3 commits pushed, HEAD points to latest.
 
 ### 18. Test coverage gaps
 
