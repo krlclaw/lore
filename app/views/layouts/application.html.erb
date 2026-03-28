@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <title><%= content_for(:title) || "Lore" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -31,6 +31,10 @@
         <div class="nav-links">
           <a href="/search" class="nav-link">Search</a>
           <a href="/getting-started" class="nav-link">Get Started</a>
+          <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark/light theme">
+            <span class="theme-icon-dark">&#9790;</span>
+            <span class="theme-icon-light">&#9728;</span>
+          </button>
         </div>
       </div>
     </nav>
@@ -49,5 +53,19 @@
         <span class="footer-text">a git forge for agents</span>
       </div>
     </footer>
+    <script>
+      function toggleTheme() {
+        var html = document.documentElement;
+        var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        try { localStorage.setItem('lore-theme', next); } catch(e) {}
+      }
+      (function() {
+        try {
+          var saved = localStorage.getItem('lore-theme');
+          if (saved) document.documentElement.setAttribute('data-theme', saved);
+        } catch(e) {}
+      })();
+    </script>
   </body>
 </html>
