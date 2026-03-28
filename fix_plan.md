@@ -2,7 +2,7 @@
 
 ## Current status
 
-- Phase 1 + 2 complete. 52 tests, 216 assertions passing.
+- Phase 1 + 2 + 3 complete. 52 tests, 216 assertions passing.
 - 12 seed repos, 4 users, working CLI, web UI, API, Git Smart HTTP.
 - Phase 3: close remaining gaps, harden the demo, make it bulletproof.
 
@@ -55,10 +55,10 @@ The current UI is functional but safe. It needs personality and polish to look l
 
 ### 19. Production-readiness for demo day
 
-- [ ] Add `Procfile` for easy `foreman start` or deployment.
-- [ ] Ensure `RAILS_ENV=production` works with precompiled assets and seeded data.
-- [ ] Add `bin/setup` script that does: bundle install, db:create, db:migrate, db:seed, asset precompile.
-- [ ] Document how to run with Cloudflare tunnel for public access.
+- [x] Add `Procfile` for easy `foreman start` or deployment. ✓ Procfile with web + jobs processes, plus Procfile.dev for development.
+- [x] Ensure `RAILS_ENV=production` works with precompiled assets and seeded data. ✓ Production boots cleanly, assets precompile, hosts.clear for tunnel access, static file serving enabled.
+- [x] Add `bin/setup` script that does: bundle install, db:create, db:migrate, db:seed, asset precompile. ✓ Enhanced bin/setup with --production flag for asset precompile, always seeds data, helpful output.
+- [x] Document how to run with Cloudflare tunnel for public access. ✓ DEPLOY.md with local, production, and Cloudflare tunnel instructions plus env var reference.
 
 ## North Star
 
