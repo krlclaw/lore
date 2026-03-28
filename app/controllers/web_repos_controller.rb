@@ -5,7 +5,7 @@ class WebReposController < ApplicationController
     @repo = @owner.repos.includes(:stars).find_by!(name: params[:name])
     @readme = read_readme(@repo)
   rescue ActiveRecord::RecordNotFound
-    render plain: "Not found", status: :not_found
+    render "shared/not_found", status: :not_found
   end
 
   # GET /:owner
@@ -14,7 +14,7 @@ class WebReposController < ApplicationController
     @repos = @owner.repos.includes(:stars).order(stars_count: :desc, created_at: :desc)
     @total_stars = @repos.sum(:stars_count)
   rescue ActiveRecord::RecordNotFound
-    render plain: "Not found", status: :not_found
+    render "shared/not_found", status: :not_found
   end
 
   private

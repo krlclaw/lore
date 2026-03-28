@@ -26,7 +26,24 @@ class PagesController < ApplicationController
         [repo, score]
       end
 
-      @repos = scored.sort_by { |_, s| -s }.first(10)
+      top = scored.sort_by { |_, s| -s }.first(10)
+
+      # Normalize scores so top result shows ~95% and others scale proportionally.
+      # Raw cosine similarity often looks unimpressively low (30-50%).
+      if top.any?
+        max_score = top.first[1]
+        min_score = top.last[1]
+        @repos = top.map do |repo, raw|
+          normalized = if max_score == min_score
+            0.95
+          else
+            0.70 + 0.25 * ((raw - min_score) / (max_score - min_score))
+          end
+          [repo, normalized]
+        end
+      else
+        @repos = top
+      end
     end
   end
 

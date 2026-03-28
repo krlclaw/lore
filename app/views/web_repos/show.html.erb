@@ -18,7 +18,7 @@
         <% end %>
       </div>
     <% end %>
-    <span class="meta-item"><span class="star-icon" style="color:var(--star-gold)">&#9733;</span> <strong><%= @repo.stars_count %></strong> stars</span>
+    <span class="meta-item star-highlight"><span class="star-icon">&#9733;</span> <strong><%= @repo.stars_count %></strong> stars</span>
     <span class="meta-item">branch: <strong>main</strong></span>
     <% if @repo.last_pushed_at %>
       <span class="meta-item">pushed <strong><%= time_ago_in_words(@repo.last_pushed_at) %> ago</strong></span>
@@ -29,7 +29,7 @@
     <div class="clone-label">Clone via HTTPS</div>
     <div class="clone-url">
       <span id="clone-url-text"><%= @repo.clone_url(request) %></span>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('clone-url-text').textContent)">copy</button>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('clone-url-text').textContent);this.textContent='copied!';setTimeout(()=>this.textContent='copy',1500)">copy</button>
     </div>
   </div>
 
