@@ -1,0 +1,5 @@
+No remaining unchecked items in fix_plan.md. Every task across all phases is complete.
+
+COMPLETED: Production-readiness — Procfile for foreman, enhanced bin/setup with seeds + asset precompile, production config (hosts.clear, static files), DEPLOY.md with Cloudflare tunnel docs. All fix_plan.md items now done (52 tests, 216 assertions passing).
+
+ALL_DONE
