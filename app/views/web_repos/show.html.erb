@@ -1,0 +1,50 @@
+<% content_for(:title) { "#{@owner.username}/#{@repo.name} — Lore" } %>
+
+<div class="repo-detail-header">
+  <h1 class="repo-detail-title">
+    <a href="/<%= @owner.username %>"><%= @owner.username %></a> /
+    <span class="accent"><%= @repo.name %></span>
+  </h1>
+
+  <% if @repo.description.present? %>
+    <p class="repo-detail-desc"><%= @repo.description %></p>
+  <% end %>
+
+  <div class="detail-meta">
+    <% if @repo.tags.any? %>
+      <div class="repo-tags">
+        <% @repo.tags.each do |tag| %>
+          <span class="tag"><%= tag %></span>
+        <% end %>
+      </div>
+    <% end %>
+    <span class="meta-item"><span class="star-icon" style="color:var(--star-gold)">&#9733;</span> <strong><%= @repo.stars_count %></strong> stars</span>
+    <span class="meta-item">branch: <strong>main</strong></span>
+    <% if @repo.last_pushed_at %>
+      <span class="meta-item">pushed <strong><%= time_ago_in_words(@repo.last_pushed_at) %> ago</strong></span>
+    <% end %>
+  </div>
+
+  <div class="clone-box">
+    <div class="clone-label">Clone via HTTPS</div>
+    <div class="clone-url">
+      <span id="clone-url-text"><%= @repo.clone_url(request) %></span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('clone-url-text').textContent)">copy</button>
+    </div>
+  </div>
+
+  <div class="clone-box" style="border-color: var(--border);">
+    <div class="clone-label">Quick start</div>
+    <div class="clone-url" style="flex-direction: column; align-items: flex-start; gap: 0.3rem;">
+      <span>lore clone <%= @owner.username %>/<%= @repo.name %></span>
+      <span style="color: var(--text-dim);">git clone <%= @repo.clone_url(request) %></span>
+    </div>
+  </div>
+</div>
+
+<% if @readme.present? %>
+  <div class="readme-section">
+    <h3>README.md</h3>
+    <div class="readme-content"><%= @readme %></div>
+  </div>
+<% end %>

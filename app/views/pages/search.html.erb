@@ -1,0 +1,25 @@
+<% content_for(:title) { @query.present? ? "#{@query} — Lore search" : "Search — Lore" } %>
+
+<h2 class="section-title">Search repos</h2>
+
+<%= form_tag("/search", method: :get, class: "search-form") do %>
+  <input type="text" name="q" value="<%= @query %>" class="search-input" placeholder="what do you want to do?" autofocus>
+  <button type="submit" class="search-btn">search</button>
+<% end %>
+
+<% if @query.present? && @repos.any? %>
+  <div class="repo-list">
+    <% @repos.each do |repo, score| %>
+      <%= render "shared/repo_card", repo: repo, score: score %>
+    <% end %>
+  </div>
+<% elsif @query.present? %>
+  <div class="empty-state">
+    <p>No results for &ldquo;<%= @query %>&rdquo;</p>
+    <p class="hint">Try describing what you want to do in plain language.</p>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <p>Type what you want to do. Lore searches by intent, not keywords.</p>
+  </div>
+<% end %>

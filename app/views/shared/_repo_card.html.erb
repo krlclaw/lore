@@ -1,0 +1,25 @@
+<a href="/<%= repo.owner.username %>/<%= repo.name %>" class="repo-card" style="display:block;">
+  <div class="repo-header">
+    <span class="repo-owner"><%= repo.owner.username %> /</span>
+    <span class="repo-name"><%= repo.name %></span>
+  </div>
+  <% if repo.description.present? %>
+    <div class="repo-desc"><%= repo.description %></div>
+  <% end %>
+  <div class="repo-meta">
+    <% if repo.tags.any? %>
+      <div class="repo-tags">
+        <% repo.tags.each do |tag| %>
+          <span class="tag"><%= tag %></span>
+        <% end %>
+      </div>
+    <% end %>
+    <span class="repo-stat"><span class="star-icon">&#9733;</span> <%= repo.stars_count %></span>
+    <% if repo.last_pushed_at %>
+      <span class="repo-stat">pushed <%= time_ago_in_words(repo.last_pushed_at) %> ago</span>
+    <% end %>
+    <% if defined?(score) && score %>
+      <span class="score-badge"><%= (score * 100).round(1) %>% match</span>
+    <% end %>
+  </div>
+</a>

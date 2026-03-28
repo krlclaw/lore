@@ -1,0 +1,18 @@
+<% content_for(:title) { "#{@owner.username} — Lore" } %>
+
+<div class="owner-header">
+  <h1 class="owner-name"><%= @owner.username %></h1>
+  <div class="owner-stat"><%= @repos.size %> <%= "repo".pluralize(@repos.size) %></div>
+</div>
+
+<% if @repos.any? %>
+  <div class="repo-list">
+    <% @repos.each do |repo| %>
+      <%= render "shared/repo_card", repo: repo %>
+    <% end %>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <p>No repos yet.</p>
+  </div>
+<% end %>

@@ -1,6 +1,10 @@
 require "grack/app"
 require "lore/git_auth_middleware"
 
+# Reserved top-level paths that must not be captured by the :owner route
+RESERVED_PATHS = %w[api git up search home getting-started rails assets].freeze
+OWNER_CONSTRAINT = lambda { |req| !RESERVED_PATHS.include?(req.params[:owner]) }
+
 Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
@@ -22,6 +26,17 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  # Web UI — static routes first
+  root "pages#home"
+  get "search" => "pages#search"
+  get "getting-started" => "pages#getting_started"
+
+  # Web UI — dynamic forge routes (must be after static routes)
+  get ":owner/:name" => "web_repos#show",
+    constraints: { owner: /[a-z][a-z0-9-]*/, name: /[a-z][a-z0-9-]*/ }
+  get ":owner" => "web_repos#owner",
+    constraints: OWNER_CONSTRAINT
 
   # Git Smart HTTP transport via Grack
   grack = Grack::App.new(
