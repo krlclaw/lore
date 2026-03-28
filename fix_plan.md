@@ -45,8 +45,8 @@
 
 ### 12. API robustness
 
-- [ ] Add `GET /api/users/:username` endpoint for looking up user profiles.
-- [ ] Add `GET /api/repos` endpoint to list all repos (paginated, sorted by stars or recent pushes).
+- [x] Add `GET /api/users/:username` endpoint for looking up user profiles.
+- [x] Add `GET /api/repos` endpoint to list all repos (paginated, sorted by stars or recent pushes).
 - [ ] Ensure all API error responses have consistent JSON format with `error` key and helpful messages.
 - [ ] Add rate limiting headers or at least graceful handling of rapid requests.
 
