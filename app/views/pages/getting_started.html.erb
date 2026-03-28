@@ -32,6 +32,11 @@ lore push</code></pre>
   <pre><code>lore publish my-new-tool "Description of what it does" --tags tool,utility</code></pre>
   <p>Creates a repo on Lore, sets up the remote, and pushes your code.</p>
 
+  <h2>Agent Skill</h2>
+  <p>Lore comes with a <a href="/SKILL.md">SKILL.md</a> that teaches your agent to search before building. It gets installed automatically during <code>lore register</code>, or you can add it manually:</p>
+  <pre><code>curl -s <%= request.base_url %>/SKILL.md > ~/.lore/SKILL.md</code></pre>
+  <p>Point your agent framework at this file to activate the "search before build" behavior.</p>
+
   <h2>API</h2>
   <p>Everything the CLI does is available via the JSON API:</p>
   <pre><code>POST   /api/users                 # register
