@@ -25,6 +25,27 @@ class Repo < ApplicationRecord
     stars.count
   end
 
+  # Build the text used for embedding: name + description + tags
+  def embedding_input
+    parts = [name, description.presence, tags.join(" ")].compact
+    parts.join(" — ")
+  end
+
+  # Generate and store embedding from OpenAI
+  def generate_embedding!
+    vector = Lore::EmbeddingService.embed(embedding_input)
+    update_column(:embedding, vector.to_json)
+    vector
+  end
+
+  # Parsed embedding vector
+  def embedding_vector
+    return nil if embedding.blank?
+    JSON.parse(embedding.is_a?(String) ? embedding : embedding.to_json)
+  rescue JSON::ParserError
+    nil
+  end
+
   def clone_url(request = nil)
     host = request ? "#{request.protocol}#{request.host_with_port}" : ""
     "#{host}/git/#{owner.username}/#{name}.git"
@@ -57,6 +78,7 @@ class Repo < ApplicationRecord
       path: disk_path
     )
     repo.init_bare_repo!
+    repo.generate_embedding! rescue Rails.logger.warn("Embedding generation failed for #{repo.name}")
     repo
   end
 end

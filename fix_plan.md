@@ -3,7 +3,7 @@
 ## Current status
 
 - Source-of-truth spec exported to `spec.md`.
-- Sections 0–3 complete: Rails app, auth, data model, repo creation, Git Smart HTTP all working.
+- Sections 0–4 complete: Rails app, auth, data model, repo creation, Git Smart HTTP, search, stars all working.
 - Target is a hackathon MVP optimized for the 1-minute demo flow.
 
 ## Highest-priority execution plan
@@ -34,9 +34,9 @@
 
 ### 4. Search + stars
 
-- [ ] Implement repo search API returning ranked results with similarity scores.
-- [ ] Add embedding generation/storage for `name + description + tags`.
-- [ ] Implement star/unstar flows and star counts.
+- [x] Implement repo search API returning ranked results with similarity scores.
+- [x] Add embedding generation/storage for `name + description + tags`.
+- [x] Implement star/unstar flows and star counts.
 - [ ] Ensure the seeded `slack-notify` repo is top-ranked for demo-critical queries.
 
 ### 5. Minimal web UI
@@ -70,4 +70,4 @@
 
 ## Next recommended increment
 
-- Implement search API with embeddings and star/unstar flows.
+- Build minimal web UI (homepage, search, repo detail, user page).

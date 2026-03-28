@@ -12,7 +12,12 @@ Rails.application.routes.draw do
     end
     resources :repos, only: [:create] do
       collection do
+        get "search", action: :search
         get ":owner/:name", action: :show, as: :show,
+          constraints: { owner: /[a-z][a-z0-9-]*/, name: /[a-z][a-z0-9-]*/ }
+        post ":owner/:name/star", action: :star,
+          constraints: { owner: /[a-z][a-z0-9-]*/, name: /[a-z][a-z0-9-]*/ }
+        delete ":owner/:name/star", action: :unstar,
           constraints: { owner: /[a-z][a-z0-9-]*/, name: /[a-z][a-z0-9-]*/ }
       end
     end
