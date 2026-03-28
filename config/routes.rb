@@ -1,14 +1,32 @@
-Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+require "grack/app"
+require "lore/git_auth_middleware"
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+Rails.application.routes.draw do
+  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # JSON API
+  namespace :api do
+    resources :users, only: [:create], param: :username do
+      get :repos, on: :member
+    end
+    resources :repos, only: [:create] do
+      collection do
+        get ":owner/:name", action: :show, as: :show,
+          constraints: { owner: /[a-z][a-z0-9-]*/, name: /[a-z][a-z0-9-]*/ }
+      end
+    end
+  end
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Git Smart HTTP transport via Grack
+  grack = Grack::App.new(
+    root: Rails.application.config.lore_repo_root,
+    allow_pull: true,
+    allow_push: true  # Auth is enforced by GitAuthMiddleware, not Grack
+  )
+  git_stack = Rack::Builder.new do
+    use Lore::GitAuthMiddleware
+    run grack
+  end
+  mount git_stack => "/git"
 end

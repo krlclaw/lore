@@ -38,5 +38,10 @@ module Lore
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Lore repo storage root — bare git repos live here as :owner/:repo.git
+    config.lore_repo_root = ENV.fetch("LORE_REPO_ROOT") {
+      Rails.root.join("storage", "repos", Rails.env).to_s
+    }
   end
 end
