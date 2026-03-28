@@ -2,72 +2,61 @@
 
 ## Current status
 
-- Source-of-truth spec exported to `spec.md`.
-- Sections 0–6 complete: Rails app, auth, data model, repo creation, Git Smart HTTP, search, stars, web UI, CLI all working.
-- Target is a hackathon MVP optimized for the 1-minute demo flow.
+- MVP complete: Rails app, auth, Git Smart HTTP, search, stars, web UI, CLI, seed data, tests.
+- 34 tests passing, 86 assertions.
+- All v1 items from original plan are done.
+- Now improving toward the big vision: making the demo compelling and the product feel real.
 
-## Highest-priority execution plan
+## Phase 2: Polish, demo-readiness, and vision alignment
 
-### 0. Project bootstrap
+### 8. Demo polish — make the 1-min video flawless
 
-- [x] Initialize the Rails app and dependency baseline for Lore v1. (Rails 8.1.3, sqlite3, grack, bcrypt, minitest configured)
-- [x] Add Grack and configure a repo-root path that works in local development/test.
-- [x] Add minimal project documentation for setup/run/test if missing.
+- [ ] Verify `lore search "send slack notification"` returns slack-notify as #1 with ⭐34 stars (spec says 34, currently 3). Fix seed star counts to match demo script.
+- [ ] Ensure `lore clone lore-agent/slack-notify` works end-to-end with auto-star. Test the exact demo flow.
+- [ ] Make CLI output beautiful: clean formatting, color output (bold repo names, dim metadata), aligned columns.
+- [ ] Add a real working `slack-notify` script in the seeded repo that actually posts to a webhook URL when run.
+- [ ] Ensure `lore push` after editing a cloned repo works smoothly (rebase + push, helpful error messages).
+- [ ] Test non-fast-forward rejection gives a clear, agent-friendly error message.
 
-### 1. Authentication + core data model
+### 9. Web UI — make it look like a real product
 
-- [x] Implement `User`, `Repo`, and `Star` models with the required constraints and validations.
-- [x] Implement PAT issuance on user creation with digest-only storage.
-- [x] Add auth helpers for bearer PAT API auth and Basic auth for git transport.
+- [ ] Improve homepage design: hero section with the Lore narrative, featured repos grid, recent activity.
+- [ ] Add dark/light theme that feels intentional (not default Rails).
+- [ ] Search page: instant-feeling results, search-as-you-type or fast form submit, highlighted matching terms.
+- [ ] Repo page: show README content rendered as HTML (parse from bare git repo), prominent clone command with copy button.
+- [ ] Owner page: avatar/identity section, contribution activity, list of repos with stats.
+- [ ] Add a global footer with links and branding.
+- [ ] Add favicon and meta tags for social sharing (og:title, og:description, og:image).
 
-### 2. Repo creation + storage
+### 10. Seed data — make the ecosystem feel alive
 
-- [x] Implement repo creation API that validates owner/name, creates the DB row, initializes a bare repo on disk, and points `HEAD` at `main`.
-- [x] Return canonical `web_url` and `clone_url` values from repo creation/read APIs.
-- [x] Update repo metadata on successful pushes, including `last_pushed_at`.
+- [ ] Increase star counts on seed repos to realistic numbers (slack-notify: 34, send-email: 22, fetch-url: 18, etc.).
+- [ ] Add more seed repos (8-12 total) covering common agent tasks: file-reader, csv-parser, screenshot-tool, cron-scheduler, env-checker.
+- [ ] Each seed repo should have a realistic commit history (3-5 commits), not just one initial commit.
+- [ ] Add 3-4 seed users (agent identities) so repos aren't all from `lore-agent`.
+- [ ] Seed some stars across users so the star counts look organic.
 
-### 3. Git Smart HTTP
+### 11. Agent experience — make Lore feel native to agent workflows
 
-- [x] Mount Grack under `/git`.
-- [x] Add middleware that resolves repo access from the request path and enforces Lore v1 rules.
-- [x] Validate anonymous clone/fetch, authenticated push, and non-fast-forward rejection to `main`.
+- [ ] Create the SKILL.md file as specified in spec.md — the OpenClaw skill that teaches agents "search before build".
+- [ ] `lore register` should install the skill into the agent's skill directory automatically.
+- [ ] Add `getting-started.md` as a proper served page that agents can curl and follow autonomously.
+- [ ] Ensure every seeded repo has an agent-readable README: one-sentence summary, inputs, outputs, usage example, dependencies.
 
-### 4. Search + stars
+### 12. API robustness
 
-- [x] Implement repo search API returning ranked results with similarity scores.
-- [x] Add embedding generation/storage for `name + description + tags`.
-- [x] Implement star/unstar flows and star counts.
-- [x] Ensure the seeded `slack-notify` repo is top-ranked for demo-critical queries.
+- [ ] Add `GET /api/users/:username` endpoint for looking up user profiles.
+- [ ] Add `GET /api/repos` endpoint to list all repos (paginated, sorted by stars or recent pushes).
+- [ ] Ensure all API error responses have consistent JSON format with `error` key and helpful messages.
+- [ ] Add rate limiting headers or at least graceful handling of rapid requests.
 
-### 5. Minimal web UI
+### 13. End-to-end validation hardening
 
-- [x] Build a homepage that introduces Lore and highlights repos in a demo-friendly way.
-- [x] Build a dedicated search page for searching all repos.
-- [x] Build a user page that lists a user's repos.
-- [x] Build a repo detail page showing description, tags, stars, clone URL, and last push metadata.
-- [x] Serve `getting-started.md` from the app.
+- [ ] Add integration test: full demo scenario (register → search → clone → edit → push → verify metadata update).
+- [ ] Add test: search ranking — verify slack-notify beats other repos for "send slack notification".
+- [ ] Add test: non-fast-forward push rejection returns proper error.
+- [ ] Add test: CLI commands produce expected output format.
 
-### 6. Lore CLI
+## North Star
 
-- [x] Implement `lore register`.
-- [x] Implement `lore search` with predictable terminal output.
-- [x] Implement `lore clone` with auto-star behavior.
-- [x] Implement `lore publish`, `lore push`, and `lore whoami`.
-- [x] Install/save config in `~/.lore/config` and set git identity during register.
-
-### 7. Demo fixtures + end-to-end validation
-
-- [x] Seed working demo repos with realistic metadata, commits, and agent-readable READMEs.
-- [x] Add focused tests for API behavior, repo creation, auth, and search ranking.
-- [x] Add an end-to-end demo validation path covering register/create/clone/push/metadata refresh.
-- [x] Validate the exact filmed scenario for Slack search/clone/use/push.
-
-## Known design constraints
-
-- Optimize for a compelling demo over long-term architecture purity.
-- Keep semantic-context ideas out of v1 unless needed as mock/demo content only.
-- Avoid broad speculative work; each increment should move a demo-critical capability forward.
-
-## Next recommended increment
-
-All items complete. The Lore MVP is fully functional with demo data, tests, and documentation.
+Every improvement should make someone watching the demo say "oh, that's different." The product should feel like a real forge — not a prototype. The CLI should feel native to agents. The web UI should feel designed, not scaffolded.
