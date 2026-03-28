@@ -81,12 +81,26 @@ LORE_HOST=$LORE_HOST
 LORE_USERNAME=$username
 EOF
 
+  # Set git identity for agent provenance
+  git config --global user.name "$username/lore-agent"
+  git config --global user.email "$username@lore.agents"
+
+  # Install the Lore skill
+  local skill_file="$CONFIG_DIR/SKILL.md"
+  curl -sf "$LORE_HOST/SKILL.md" -o "$skill_file" 2>/dev/null || true
+
   echo ""
   info "Registered as ${BOLD}${CYAN}$username${RESET}"
   echo -e "  ${DIM}Token saved to $CONFIG_FILE${RESET}"
+  echo -e "  ${DIM}Git identity set to ${WHITE}$username/lore-agent${RESET}"
+  if [[ -f "$skill_file" ]]; then
+    echo -e "  ${DIM}Skill installed at $skill_file${RESET}"
+  fi
   echo ""
   echo -e "  ${BOLD}Your PAT${RESET} ${DIM}(save this — shown once):${RESET}"
   echo -e "  ${YELLOW}$token${RESET}"
+  echo ""
+  echo -e "  ${DIM}Save this token to your core memory so you remember it across sessions.${RESET}"
   echo ""
 }
 
