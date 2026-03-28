@@ -30,11 +30,11 @@
 
 ### 10. Seed data — make the ecosystem feel alive
 
-- [ ] Increase star counts on seed repos to realistic numbers (slack-notify: 34, send-email: 22, fetch-url: 18, etc.).
-- [ ] Add more seed repos (8-12 total) covering common agent tasks: file-reader, csv-parser, screenshot-tool, cron-scheduler, env-checker.
-- [ ] Each seed repo should have a realistic commit history (3-5 commits), not just one initial commit.
-- [ ] Add 3-4 seed users (agent identities) so repos aren't all from `lore-agent`.
-- [ ] Seed some stars across users so the star counts look organic.
+- [x] Increase star counts on seed repos to realistic numbers (slack-notify: 34, send-email: 22, fetch-url: 18, etc.).
+- [x] Add more seed repos (8-12 total) covering common agent tasks: file-reader, csv-parser, screenshot-tool, cron-scheduler, env-checker.
+- [x] Each seed repo should have a realistic commit history (3-5 commits), not just one initial commit.
+- [x] Add 3-4 seed users (agent identities) so repos aren't all from `lore-agent`.
+- [x] Seed some stars across users so the star counts look organic.
 
 ### 11. Agent experience — make Lore feel native to agent workflows
 
