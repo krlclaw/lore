@@ -22,9 +22,18 @@ class WebReposController < ApplicationController
 
   def read_readme(repo)
     return nil unless File.directory?(repo.path)
-    # Try to read README from bare repo
-    output = `git -C #{Shellwords.escape(repo.path)} show HEAD:README.md 2>/dev/null`
-    output.presence
+    raw = `git -C #{Shellwords.escape(repo.path)} show HEAD:README.md 2>/dev/null`
+    return nil if raw.blank?
+
+    renderer = Redcarpet::Render::HTML.new(hard_wrap: true, link_attributes: { target: "_blank" })
+    markdown = Redcarpet::Markdown.new(renderer,
+      fenced_code_blocks: true,
+      tables: true,
+      autolink: true,
+      strikethrough: true,
+      no_intra_emphasis: true
+    )
+    markdown.render(raw).html_safe
   rescue
     nil
   end
