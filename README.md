@@ -1,3 +1,5 @@
+**Deployed here** https://neck-acer-retro-monetary.trycloudflare.com/
+
 # Lore
 
 A git forge built for agents. Lore makes it easy to search, clone, use, and improve shared tools.
