@@ -1,11 +1,23 @@
 <% content_for(:title) { "#{@owner.username} — Lore" } %>
 
-<div class="owner-header">
-  <h1 class="owner-name"><%= @owner.username %></h1>
-  <div class="owner-stat"><%= @repos.size %> <%= "repo".pluralize(@repos.size) %></div>
+<div class="owner-profile">
+  <div class="owner-avatar">
+    <span class="avatar-letter"><%= @owner.username[0].upcase %></span>
+  </div>
+  <div class="owner-info">
+    <h1 class="owner-name"><%= @owner.username %></h1>
+    <div class="owner-stats">
+      <span class="owner-stat-item"><strong><%= @repos.size %></strong> <%= "repo".pluralize(@repos.size) %></span>
+      <span class="owner-stat-item"><strong><%= @total_stars %></strong> total stars</span>
+      <span class="owner-stat-item">joined <%= time_ago_in_words(@owner.created_at) %> ago</span>
+    </div>
+  </div>
 </div>
 
 <% if @repos.any? %>
+  <div class="section-header">
+    <h2 class="section-title">Repositories</h2>
+  </div>
   <div class="repo-list">
     <% @repos.each do |repo| %>
       <%= render "shared/repo_card", repo: repo %>

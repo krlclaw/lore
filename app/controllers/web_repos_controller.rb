@@ -11,9 +11,8 @@ class WebReposController < ApplicationController
   # GET /:owner
   def owner
     @owner = User.find_by!(username: params[:owner])
-    @repos = @owner.repos.includes(:stars).order(
-      Arel.sql("CASE WHEN last_pushed_at IS NULL THEN 1 ELSE 0 END, last_pushed_at DESC, created_at DESC")
-    )
+    @repos = @owner.repos.includes(:stars).order(stars_count: :desc, created_at: :desc)
+    @total_stars = @repos.sum(:stars_count)
   rescue ActiveRecord::RecordNotFound
     render plain: "Not found", status: :not_found
   end

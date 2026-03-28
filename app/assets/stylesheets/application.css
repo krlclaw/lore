@@ -552,19 +552,47 @@ a:hover { color: var(--text-bright); }
 }
 
 /* ── Owner page ── */
-.owner-header {
+.owner-profile {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
   margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
 }
+.owner-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.avatar-letter {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--bg);
+}
+.owner-info { flex: 1; }
 .owner-name {
   font-family: var(--font-mono);
   font-size: 1.5rem;
   color: var(--text-bright);
+  margin-bottom: 0.25rem;
 }
-.owner-stat {
+.owner-stats {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+.owner-stat-item {
+  font-size: 0.85rem;
   color: var(--text-dim);
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
 }
+.owner-stat-item strong { color: var(--text); }
 
 /* ── Empty state ── */
 .empty-state {

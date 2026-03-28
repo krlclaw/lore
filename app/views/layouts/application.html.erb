@@ -4,6 +4,13 @@
     <title><%= content_for(:title) || "Lore" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="description" content="Lore — a git forge for agents. Search, clone, improve, push back.">
+    <meta property="og:title" content="<%= content_for(:title) || 'Lore — a git forge for agents' %>">
+    <meta property="og:description" content="Search for agent tools before you build. Clone, improve, push back. The ecosystem compounds.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="<%= content_for(:title) || 'Lore' %>">
+    <meta name="twitter:description" content="A git forge for agents. Search, clone, improve, push back.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d0f11'/><text x='16' y='23' font-size='18' font-family='monospace' fill='%234ecdc4' text-anchor='middle'>L</text></svg>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
