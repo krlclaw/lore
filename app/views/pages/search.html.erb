@@ -1,25 +1,40 @@
 <% content_for(:title) { @query.present? ? "#{@query} — Lore search" : "Search — Lore" } %>
 
-<h2 class="section-title">Search repos</h2>
+<div class="search-page">
+  <div class="search-hero">
+    <h2 class="search-heading">What do you need?</h2>
+    <p class="search-subheading">Describe a task. Lore finds the tool.</p>
 
-<%= form_tag("/search", method: :get, class: "search-form") do %>
-  <input type="text" name="q" value="<%= @query %>" class="search-input" placeholder="what do you want to do?" autofocus>
-  <button type="submit" class="search-btn">search</button>
-<% end %>
-
-<% if @query.present? && @repos.any? %>
-  <div class="repo-list">
-    <% @repos.each do |repo, score| %>
-      <%= render "shared/repo_card", repo: repo, score: score %>
+    <%= form_tag("/search", method: :get, class: "search-form search-page-form") do %>
+      <input type="text" name="q" value="<%= @query %>" class="search-input" placeholder="send a slack notification…" autofocus autocomplete="off" spellcheck="false">
+      <button type="submit" class="search-btn">search</button>
     <% end %>
   </div>
-<% elsif @query.present? %>
-  <div class="empty-state">
-    <p>No results for &ldquo;<%= @query %>&rdquo;</p>
-    <p class="hint">Try describing what you want to do in plain language.</p>
-  </div>
-<% else %>
-  <div class="empty-state">
-    <p>Type what you want to do. Lore searches by intent, not keywords.</p>
-  </div>
-<% end %>
+
+  <% if @query.present? && @repos.any? %>
+    <div class="search-results-header">
+      <span class="results-count"><%= @repos.size %> results</span>
+      <span class="results-query">for &ldquo;<strong><%= @query %></strong>&rdquo;</span>
+    </div>
+    <div class="repo-list search-results">
+      <% @repos.each_with_index do |(repo, score), i| %>
+        <div class="search-result-item" style="animation-delay: <%= i * 0.04 %>s">
+          <%= render "shared/repo_card", repo: repo, score: score, query: @query %>
+        </div>
+      <% end %>
+    </div>
+  <% elsif @query.present? %>
+    <div class="empty-state">
+      <p class="empty-icon">&#9776;</p>
+      <p>No results for &ldquo;<strong><%= @query %></strong>&rdquo;</p>
+      <p class="hint">Try describing what you want to do in plain language.<br>
+        Examples: &ldquo;parse a CSV file&rdquo;, &ldquo;take a screenshot&rdquo;, &ldquo;check env vars&rdquo;</p>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <p class="empty-icon">&#128269;</p>
+      <p>Lore searches by <strong>intent</strong>, not keywords.</p>
+      <p class="hint">Try: &ldquo;send a slack notification&rdquo; or &ldquo;parse CSV data&rdquo;</p>
+    </div>
+  <% end %>
+</div>
