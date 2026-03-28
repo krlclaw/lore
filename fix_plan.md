@@ -2,61 +2,56 @@
 
 ## Current status
 
-- MVP complete: Rails app, auth, Git Smart HTTP, search, stars, web UI, CLI, seed data, tests.
-- 34 tests passing, 86 assertions.
-- All v1 items from original plan are done.
-- Now improving toward the big vision: making the demo compelling and the product feel real.
+- Phase 1 + 2 complete. 51 commits, 38 tests, 108 assertions passing.
+- 12 seed repos, 4 users, working CLI, web UI, API, Git Smart HTTP.
+- Phase 3: close remaining gaps, harden the demo, make it bulletproof.
 
-## Phase 2: Polish, demo-readiness, and vision alignment
+## Phase 3: Demo-readiness and missing pieces
 
-### 8. Demo polish — make the 1-min video flawless
+### 14. Missing demo infrastructure
 
-- [x] Verify `lore search "send slack notification"` returns slack-notify as #1 with ⭐34 stars (spec says 34, currently 3). Fix seed star counts to match demo script.
-- [x] Ensure `lore clone lore-agent/slack-notify` works end-to-end with auto-star. Test the exact demo flow.
-- [x] Make CLI output beautiful: clean formatting, color output (bold repo names, dim metadata), aligned columns.
-- [x] Add a real working `slack-notify` script in the seeded repo that actually posts to a webhook URL when run.
-- [x] Ensure `lore push` after editing a cloned repo works smoothly (rebase + push, helpful error messages).
-- [x] Test non-fast-forward rejection gives a clear, agent-friendly error message.
+- [ ] Add `public/install.sh` — a curl-installable script that copies `bin/lore` to `~/.local/bin/lore` and makes it executable. `curl -s https://lore.sh/install.sh | bash` must work.
+- [ ] Ensure the SKILL.md at `public/SKILL.md` matches the spec exactly (mandatory search-before-build rule, git identity, agent-readme format, example session).
+- [ ] The seeded `slack-notify` repo must contain a REAL working bash script that posts to a Slack webhook URL. Not a placeholder. `SLACK_WEBHOOK_URL=xxx MESSAGE="hello" bash slack-notify.sh` must work.
+- [ ] Add `public/getting-started.md` as a raw markdown file (not just the HTML page) so agents can `curl https://lore.sh/getting-started.md` and get actionable markdown.
 
-### 9. Web UI — make it look like a real product
+### 15. UI polish for demo recording
 
-- [x] Improve homepage design: hero section with the Lore narrative, featured repos grid, recent activity.
-- [x] Add dark/light theme that feels intentional (not default Rails).
-- [x] Search page: instant-feeling results, search-as-you-type or fast form submit, highlighted matching terms.
-- [x] Repo page: show README content rendered as HTML (parse from bare git repo), prominent clone command with copy button.
-- [x] Owner page: avatar/identity section, contribution activity, list of repos with stats.
-- [x] Add a global footer with links and branding.
-- [x] Add favicon and meta tags for social sharing (og:title, og:description, og:image).
+- [ ] Homepage: the featured repos grid should show star counts prominently (⭐34, not just a number).
+- [ ] Repo page: add a "Quick Start" section showing `lore clone owner/repo` and `git clone <url>` commands with a visible copy button (JS clipboard API).
+- [ ] Search results: show similarity score as a subtle confidence indicator.
+- [ ] Add smooth page transitions / loading states so the demo recording feels snappy.
+- [ ] Ensure all pages render well at large font sizes (demo will be recorded with big terminal font).
 
-### 10. Seed data — make the ecosystem feel alive
+### 16. CLI hardening
 
-- [x] Increase star counts on seed repos to realistic numbers (slack-notify: 34, send-email: 22, fetch-url: 18, etc.).
-- [x] Add more seed repos (8-12 total) covering common agent tasks: file-reader, csv-parser, screenshot-tool, cron-scheduler, env-checker.
-- [x] Each seed repo should have a realistic commit history (3-5 commits), not just one initial commit.
-- [x] Add 3-4 seed users (agent identities) so repos aren't all from `lore-agent`.
-- [x] Seed some stars across users so the star counts look organic.
+- [ ] `lore search` output must match spec exactly: numbered results, `owner/repo ⭐N — description` format, top 10.
+- [ ] `lore clone` must auto-star and print confirmation: "Cloned and starred owner/repo".
+- [ ] `lore push` must handle the case where the remote isn't set (cloned via git instead of lore clone).
+- [ ] `lore register` should validate the server is reachable before attempting registration.
+- [ ] All CLI commands should have `--help` with usage examples.
 
-### 11. Agent experience — make Lore feel native to agent workflows
+### 17. Git transport edge cases
 
-- [x] Create the SKILL.md file as specified in spec.md — the OpenClaw skill that teaches agents "search before build".
-- [x] `lore register` should install the skill into the agent's skill directory automatically.
-- [x] Add `getting-started.md` as a proper served page that agents can curl and follow autonomously.
-- [x] Ensure every seeded repo has an agent-readable README: one-sentence summary, inputs, outputs, usage example, dependencies.
+- [ ] Verify that `git clone http://localhost:3000/git/lore-agent/slack-notify.git` works anonymously (no auth needed).
+- [ ] Verify authenticated push updates `last_pushed_at` correctly.
+- [ ] Ensure a clear error message when pushing to a non-existent repo.
+- [ ] Test that repos with multiple commits show correct HEAD after push.
 
-### 12. API robustness
+### 18. Test coverage gaps
 
-- [x] Add `GET /api/users/:username` endpoint for looking up user profiles.
-- [x] Add `GET /api/repos` endpoint to list all repos (paginated, sorted by stars or recent pushes).
-- [x] Ensure all API error responses have consistent JSON format with `error` key and helpful messages.
-- [x] Add rate limiting headers or at least graceful handling of rapid requests.
+- [ ] Test CLI output format matches expected patterns.
+- [ ] Test star counter cache stays consistent after star/unstar.
+- [ ] Test seed data creates exactly the expected repos with correct star counts.
+- [ ] Test rate limiting headers are present on API responses.
 
-### 13. End-to-end validation hardening
+### 19. Production-readiness for demo day
 
-- [x] Add integration test: full demo scenario (register → search → clone → edit → push → verify metadata update).
-- [x] Add test: search ranking — verify slack-notify beats other repos for "send slack notification".
-- [x] Add test: non-fast-forward push rejection returns proper error.
-- [x] Add test: CLI commands produce expected output format.
+- [ ] Add `Procfile` for easy `foreman start` or deployment.
+- [ ] Ensure `RAILS_ENV=production` works with precompiled assets and seeded data.
+- [ ] Add `bin/setup` script that does: bundle install, db:create, db:migrate, db:seed, asset precompile.
+- [ ] Document how to run with Cloudflare tunnel for public access.
 
 ## North Star
 
-Every improvement should make someone watching the demo say "oh, that's different." The product should feel like a real forge — not a prototype. The CLI should feel native to agents. The web UI should feel designed, not scaffolded.
+The 1-minute demo video must be flawless. Every CLI command, every web page, every API response should feel like a real product — not a hackathon prototype.
