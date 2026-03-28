@@ -18,6 +18,11 @@ def seed_repo(owner:, name:, description:, tags:, readme:, stars_from: [], displ
   end
 
   puts "  Creating #{owner.username}/#{name}..."
+  # Clean up any leftover bare repo from a previous seed (e.g. after db:seed:replant)
+  repo_root = Rails.application.config.lore_repo_root
+  disk_path = File.join(repo_root, owner.username, "#{name}.git")
+  FileUtils.rm_rf(disk_path) if Dir.exist?(disk_path)
+
   repo = Repo.create_with_bare_repo!(
     owner: owner,
     name: name,
