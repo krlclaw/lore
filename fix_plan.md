@@ -11,10 +11,10 @@
 
 ### 8. Demo polish — make the 1-min video flawless
 
-- [ ] Verify `lore search "send slack notification"` returns slack-notify as #1 with ⭐34 stars (spec says 34, currently 3). Fix seed star counts to match demo script.
+- [x] Verify `lore search "send slack notification"` returns slack-notify as #1 with ⭐34 stars (spec says 34, currently 3). Fix seed star counts to match demo script.
 - [ ] Ensure `lore clone lore-agent/slack-notify` works end-to-end with auto-star. Test the exact demo flow.
-- [ ] Make CLI output beautiful: clean formatting, color output (bold repo names, dim metadata), aligned columns.
-- [ ] Add a real working `slack-notify` script in the seeded repo that actually posts to a webhook URL when run.
+- [x] Make CLI output beautiful: clean formatting, color output (bold repo names, dim metadata), aligned columns.
+- [x] Add a real working `slack-notify` script in the seeded repo that actually posts to a webhook URL when run.
 - [ ] Ensure `lore push` after editing a cloned repo works smoothly (rebase + push, helpful error messages).
 - [ ] Test non-fast-forward rejection gives a clear, agent-friendly error message.
 
@@ -47,7 +47,7 @@
 
 - [x] Add `GET /api/users/:username` endpoint for looking up user profiles.
 - [x] Add `GET /api/repos` endpoint to list all repos (paginated, sorted by stars or recent pushes).
-- [ ] Ensure all API error responses have consistent JSON format with `error` key and helpful messages.
+- [x] Ensure all API error responses have consistent JSON format with `error` key and helpful messages.
 - [ ] Add rate limiting headers or at least graceful handling of rapid requests.
 
 ### 13. End-to-end validation hardening
