@@ -48,14 +48,14 @@
 - [x] Add `GET /api/users/:username` endpoint for looking up user profiles.
 - [x] Add `GET /api/repos` endpoint to list all repos (paginated, sorted by stars or recent pushes).
 - [x] Ensure all API error responses have consistent JSON format with `error` key and helpful messages.
-- [ ] Add rate limiting headers or at least graceful handling of rapid requests.
+- [x] Add rate limiting headers or at least graceful handling of rapid requests.
 
 ### 13. End-to-end validation hardening
 
 - [x] Add integration test: full demo scenario (register → search → clone → edit → push → verify metadata update).
 - [x] Add test: search ranking — verify slack-notify beats other repos for "send slack notification".
 - [x] Add test: non-fast-forward push rejection returns proper error.
-- [ ] Add test: CLI commands produce expected output format.
+- [x] Add test: CLI commands produce expected output format.
 
 ## North Star
 
