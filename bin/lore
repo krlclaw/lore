@@ -7,6 +7,21 @@ set -euo pipefail
 CONFIG_DIR="$HOME/.lore"
 CONFIG_FILE="$CONFIG_DIR/config"
 
+# ── Colors ──
+
+if [[ -t 1 ]]; then
+  BOLD="\033[1m"
+  DIM="\033[2m"
+  RESET="\033[0m"
+  CYAN="\033[36m"
+  GREEN="\033[32m"
+  YELLOW="\033[33m"
+  RED="\033[31m"
+  WHITE="\033[97m"
+else
+  BOLD="" DIM="" RESET="" CYAN="" GREEN="" YELLOW="" RED="" WHITE=""
+fi
+
 # ── Config helpers ──
 
 load_config() {
@@ -20,17 +35,21 @@ load_config() {
 ensure_auth() {
   load_config
   if [[ -z "${LORE_TOKEN:-}" ]]; then
-    echo "Error: not logged in. Run: lore register <username>" >&2
+    echo -e "${RED}Error:${RESET} not logged in. Run: ${CYAN}lore register <username>${RESET}" >&2
     exit 1
   fi
 }
+
+info()  { echo -e "${GREEN}>${RESET} $*"; }
+warn()  { echo -e "${YELLOW}!${RESET} $*" >&2; }
+err()   { echo -e "${RED}Error:${RESET} $*" >&2; }
 
 # ── Commands ──
 
 cmd_register() {
   local username="${1:-}"
   if [[ -z "$username" ]]; then
-    echo "Usage: lore register <username>" >&2
+    echo -e "Usage: ${CYAN}lore register${RESET} ${DIM}<username>${RESET}" >&2
     exit 1
   fi
 
@@ -40,7 +59,7 @@ cmd_register() {
   resp=$(curl -sf -X POST "$LORE_HOST/api/users" \
     -H "Content-Type: application/json" \
     -d "{\"username\": \"$username\"}" 2>&1) || {
-    echo "Error: registration failed." >&2
+    err "registration failed."
     echo "$resp" >&2
     exit 1
   }
@@ -49,7 +68,7 @@ cmd_register() {
   token=$(echo "$resp" | grep -o '"pat":"[^"]*"' | cut -d'"' -f4)
 
   if [[ -z "$token" ]]; then
-    echo "Error: could not parse token from response." >&2
+    err "could not parse token from response."
     echo "$resp" >&2
     exit 1
   fi
@@ -62,17 +81,19 @@ LORE_HOST=$LORE_HOST
 LORE_USERNAME=$username
 EOF
 
-  echo "Registered as $username"
-  echo "Token saved to $CONFIG_FILE"
   echo ""
-  echo "Your PAT (save this — it won't be shown again):"
-  echo "  $token"
+  info "Registered as ${BOLD}${CYAN}$username${RESET}"
+  echo -e "  ${DIM}Token saved to $CONFIG_FILE${RESET}"
+  echo ""
+  echo -e "  ${BOLD}Your PAT${RESET} ${DIM}(save this — shown once):${RESET}"
+  echo -e "  ${YELLOW}$token${RESET}"
+  echo ""
 }
 
 cmd_search() {
   local query="${*}"
   if [[ -z "$query" ]]; then
-    echo "Usage: lore search <query>" >&2
+    echo -e "Usage: ${CYAN}lore search${RESET} ${DIM}<query>${RESET}" >&2
     exit 1
   fi
 
@@ -83,34 +104,58 @@ cmd_search() {
 
   local resp
   resp=$(curl -sf "$LORE_HOST/api/repos/search?q=$encoded_query" 2>&1) || {
-    echo "Error: search failed." >&2
+    err "search failed."
     exit 1
   }
 
-  # Parse and display results using ruby (available since we're in a Rails project)
   echo "$resp" | ruby -rjson -e '
-    data = JSON.parse(STDIN.read)
+    bold  = STDOUT.tty? ? "\033[1m"  : ""
+    dim   = STDOUT.tty? ? "\033[2m"  : ""
+    cyan  = STDOUT.tty? ? "\033[36m" : ""
+    yel   = STDOUT.tty? ? "\033[33m" : ""
+    green = STDOUT.tty? ? "\033[32m" : ""
+    reset = STDOUT.tty? ? "\033[0m"  : ""
+
+    data  = JSON.parse(STDIN.read)
     repos = data["repos"]
     if repos.empty?
-      puts "No results found."
+      puts "#{dim}No results found.#{reset}"
       exit
     end
+
+    puts ""
     repos.each_with_index do |r, i|
       stars = r["stars"] || 0
       score = ((r["similarity_score"] || 0) * 100).round(1)
-      line = "#{i + 1}. #{r["owner"]}/#{r["name"]}"
-      line += " \u2b50#{stars}" if stars > 0
-      line += "  \u2014 #{r["description"]}" if r["description"] && !r["description"].empty?
-      line += " (#{score}%)"
-      puts line
+      name  = "#{r["owner"]}/#{r["name"]}"
+
+      # Line 1: rank, name, stars, score
+      rank = "#{dim}#{(i + 1).to_s.rjust(2)}.#{reset}"
+      star_s = stars > 0 ? " #{yel}\u2605 #{stars}#{reset}" : ""
+      score_s = " #{dim}#{score}% match#{reset}"
+      puts "#{rank} #{bold}#{cyan}#{name}#{reset}#{star_s}#{score_s}"
+
+      # Line 2: description
+      if r["description"] && !r["description"].empty?
+        puts "      #{dim}#{r["description"]}#{reset}"
+      end
+
+      # Line 3: tags
+      tags = r["tags"] || []
+      if tags.any?
+        tag_s = tags.map { |t| "#{green}#{t}#{reset}" }.join(" ")
+        puts "      #{tag_s}"
+      end
+      puts "" if i < repos.length - 1
     end
+    puts ""
   '
 }
 
 cmd_clone() {
   local repo_path="${1:-}"
   if [[ -z "$repo_path" ]]; then
-    echo "Usage: lore clone <owner/repo>" >&2
+    echo -e "Usage: ${CYAN}lore clone${RESET} ${DIM}<owner/repo>${RESET}" >&2
     exit 1
   fi
 
@@ -121,14 +166,14 @@ cmd_clone() {
   repo=$(echo "$repo_path" | cut -d'/' -f2)
 
   if [[ -z "$owner" || -z "$repo" ]]; then
-    echo "Error: expected format owner/repo" >&2
+    err "expected format ${BOLD}owner/repo${RESET}"
     exit 1
   fi
 
   local clone_url="$LORE_HOST/git/$owner/$repo.git"
-  echo "Cloning $owner/$repo..."
+  info "Cloning ${BOLD}${CYAN}$owner/$repo${RESET}..."
   git clone "$clone_url" "$repo" || {
-    echo "Error: clone failed." >&2
+    err "clone failed."
     exit 1
   }
 
@@ -136,8 +181,12 @@ cmd_clone() {
   if [[ -n "${LORE_TOKEN:-}" ]]; then
     curl -sf -X POST "$LORE_HOST/api/repos/$owner/$repo/star" \
       -H "Authorization: Bearer $LORE_TOKEN" > /dev/null 2>&1 && \
-      echo "Starred $owner/$repo" || true
+      info "Starred ${YELLOW}$owner/$repo${RESET}" || true
   fi
+
+  echo ""
+  echo -e "  ${DIM}cd $repo && start hacking${RESET}"
+  echo ""
 }
 
 cmd_publish() {
@@ -146,7 +195,7 @@ cmd_publish() {
   local tags_str="${3:-}"
 
   if [[ -z "$name" ]]; then
-    echo "Usage: lore publish <name> [description] [--tags tag1,tag2]" >&2
+    echo -e "Usage: ${CYAN}lore publish${RESET} ${DIM}<name> [description] [--tags tag1,tag2]${RESET}" >&2
     exit 1
   fi
 
@@ -166,7 +215,7 @@ cmd_publish() {
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $LORE_TOKEN" \
     -d "$body" 2>&1) || {
-    echo "Error: publish failed." >&2
+    err "publish failed."
     echo "$resp" >&2
     exit 1
   }
@@ -174,45 +223,51 @@ cmd_publish() {
   local clone_url
   clone_url=$(echo "$resp" | ruby -rjson -e 'puts JSON.parse(STDIN.read)["repo"]["clone_url"]')
 
-  echo "Created repo: $LORE_USERNAME/$name"
-  echo "Clone URL: $clone_url"
+  echo ""
+  info "Created ${BOLD}${CYAN}$LORE_USERNAME/$name${RESET}"
+  echo -e "  ${DIM}Clone URL:${RESET} $clone_url"
 
   # If we're in a git repo, add remote and push
   if git rev-parse --git-dir > /dev/null 2>&1; then
     local push_url
     push_url=$(echo "$clone_url" | sed "s|://|://$LORE_USERNAME:$LORE_TOKEN@|")
     git remote add lore "$push_url" 2>/dev/null || git remote set-url lore "$push_url"
-    echo "Pushing to lore..."
-    git push lore main 2>&1 || echo "Push skipped (no commits or branch not ready)."
+    info "Pushing to lore..."
+    git push lore main 2>&1 || warn "Push skipped (no commits or branch not ready)."
   fi
+  echo ""
 }
 
 cmd_push() {
   ensure_auth
 
-  echo "Pulling with rebase..."
+  info "Pulling with rebase..."
   git pull --rebase origin main 2>&1 || true
 
-  echo "Pushing to origin main..."
+  info "Pushing to ${BOLD}origin main${RESET}..."
   git push origin main 2>&1 || {
-    echo "Error: push failed." >&2
+    err "push failed. If this is a non-fast-forward error, pull first:"
+    echo -e "  ${CYAN}git pull --rebase origin main${RESET}" >&2
     exit 1
   }
+  info "Done."
 }
 
 cmd_whoami() {
   ensure_auth
 
   local masked_token="${LORE_TOKEN:0:12}...${LORE_TOKEN: -4}"
-  echo "Username: $LORE_USERNAME"
-  echo "Token:    $masked_token"
-  echo "Host:     $LORE_HOST"
+  echo ""
+  echo -e "  ${DIM}Username${RESET}  ${BOLD}${CYAN}$LORE_USERNAME${RESET}"
+  echo -e "  ${DIM}Token${RESET}     ${YELLOW}$masked_token${RESET}"
+  echo -e "  ${DIM}Host${RESET}      $LORE_HOST"
+  echo ""
 }
 
 cmd_star() {
   local repo_path="${1:-}"
   if [[ -z "$repo_path" ]]; then
-    echo "Usage: lore star <owner/repo>" >&2
+    echo -e "Usage: ${CYAN}lore star${RESET} ${DIM}<owner/repo>${RESET}" >&2
     exit 1
   fi
 
@@ -224,27 +279,26 @@ cmd_star() {
 
   curl -sf -X POST "$LORE_HOST/api/repos/$owner/$repo/star" \
     -H "Authorization: Bearer $LORE_TOKEN" > /dev/null 2>&1 && \
-    echo "Starred $owner/$repo" || {
-    echo "Error: star failed." >&2
+    info "Starred ${YELLOW}$owner/$repo${RESET}" || {
+    err "star failed."
     exit 1
   }
 }
 
 cmd_help() {
-  cat <<'HELP'
-lore — CLI for the Lore git forge
-
-Commands:
-  lore register <username>     Create account, save token
-  lore search <query>          Semantic search for repos
-  lore clone <owner/repo>      Clone repo and auto-star
-  lore publish <name> [desc] [--tags t1,t2]  Create and push a new repo
-  lore push                    Pull --rebase then push to origin/main
-  lore star <owner/repo>       Star a repo
-  lore whoami                  Show current identity
-
-Config: ~/.lore/config
-HELP
+  echo ""
+  echo -e "${BOLD}lore${RESET} ${DIM}— CLI for the Lore git forge${RESET}"
+  echo ""
+  echo -e "  ${CYAN}register${RESET} ${DIM}<username>${RESET}           Create account, save token"
+  echo -e "  ${CYAN}search${RESET}   ${DIM}<query>${RESET}              Semantic search for tools"
+  echo -e "  ${CYAN}clone${RESET}    ${DIM}<owner/repo>${RESET}         Clone repo and auto-star"
+  echo -e "  ${CYAN}publish${RESET}  ${DIM}<name> [desc] [tags]${RESET}  Create and push a new repo"
+  echo -e "  ${CYAN}push${RESET}                            Pull --rebase then push"
+  echo -e "  ${CYAN}star${RESET}     ${DIM}<owner/repo>${RESET}         Star a repo"
+  echo -e "  ${CYAN}whoami${RESET}                          Show current identity"
+  echo ""
+  echo -e "  ${DIM}Config: ~/.lore/config${RESET}"
+  echo ""
 }
 
 # ── Main dispatch ──
@@ -262,7 +316,7 @@ case "$cmd" in
   star)            cmd_star "$@" ;;
   help|--help|-h)  cmd_help ;;
   *)
-    echo "Unknown command: $cmd" >&2
+    err "Unknown command: $cmd"
     cmd_help
     exit 1
     ;;
