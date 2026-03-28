@@ -241,16 +241,32 @@ cmd_publish() {
 cmd_push() {
   ensure_auth
 
+  # Build authenticated URL for push
+  local origin_url
+  origin_url=$(git remote get-url origin 2>/dev/null)
+  if [[ -z "$origin_url" ]]; then
+    err "no git remote 'origin' found. Are you in a cloned repo?"
+    exit 1
+  fi
+
+  # Inject credentials into the push URL (username:token@host)
+  local auth_url
+  auth_url=$(echo "$origin_url" | sed "s|://|://${LORE_USERNAME}:${LORE_TOKEN}@|")
+
   info "Pulling with rebase..."
-  git pull --rebase origin main 2>&1 || true
+  git pull --rebase "$auth_url" main 2>&1 || true
 
   info "Pushing to ${BOLD}origin main${RESET}..."
-  git push origin main 2>&1 || {
-    err "push failed. If this is a non-fast-forward error, pull first:"
-    echo -e "  ${CYAN}git pull --rebase origin main${RESET}" >&2
-    exit 1
-  }
-  info "Done."
+  if git push "$auth_url" main 2>&1; then
+    info "Done."
+  else
+    local exit_code=$?
+    # Check if it was a non-fast-forward rejection
+    err "push failed."
+    echo -e "  ${DIM}If this is a non-fast-forward error, someone else pushed first.${RESET}" >&2
+    echo -e "  ${DIM}Try:${RESET} ${CYAN}git pull --rebase origin main${RESET} ${DIM}then${RESET} ${CYAN}lore push${RESET}" >&2
+    exit $exit_code
+  fi
 }
 
 cmd_whoami() {
