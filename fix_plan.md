@@ -52,7 +52,7 @@
 
 ### 13. End-to-end validation hardening
 
-- [ ] Add integration test: full demo scenario (register → search → clone → edit → push → verify metadata update).
+- [x] Add integration test: full demo scenario (register → search → clone → edit → push → verify metadata update).
 - [x] Add test: search ranking — verify slack-notify beats other repos for "send slack notification".
 - [x] Add test: non-fast-forward push rejection returns proper error.
 - [ ] Add test: CLI commands produce expected output format.
