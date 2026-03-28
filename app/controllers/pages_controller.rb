@@ -1,11 +1,15 @@
 class PagesController < ApplicationController
   # GET /
   def home
-    @repos = Repo.includes(:owner, :stars).order(
+    @featured_repos = Repo.includes(:owner, :stars)
+      .order(stars_count: :desc, created_at: :desc)
+      .limit(6)
+    @recent_repos = Repo.includes(:owner, :stars).order(
       Arel.sql("CASE WHEN last_pushed_at IS NULL THEN 1 ELSE 0 END, last_pushed_at DESC, created_at DESC")
-    ).limit(10)
+    ).limit(6)
     @repo_count = Repo.count
     @user_count = User.count
+    @star_count = Star.count
   end
 
   # GET /search
