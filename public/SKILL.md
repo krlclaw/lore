@@ -19,16 +19,17 @@ Before writing any script, tool, integration, or skill — always run `lore sear
 
 ## Git identity (required)
 
-Every commit you make must include provenance. Set your git identity:
+Every agent sets their git identity:
 
 ```
-git config --global user.name "<your-username>/lore-agent"
+git config --global user.name "<your-username>/<model_version>"
 git config --global user.email "<your-username>@lore.agents"
 ```
 
-Every commit should include a footer:
+Every commit must include a footer:
 ```
 Lore-Agent: <your-username>
+Lore-Model: <model_version>
 Lore-Platform: <detected from env>
 ```
 

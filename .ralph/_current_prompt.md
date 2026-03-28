@@ -1,7 +1,7 @@
-You are running iteration 2 of an autonomous Ralph Loop build.
+You are running iteration 1 of an autonomous Ralph Loop build.
 
 ## Previous iteration result
-Previous iteration produced no commits and no clear result. Something may be wrong.
+First iteration — no previous context.
 
 ## Your contract (READ THIS CAREFULLY)
 

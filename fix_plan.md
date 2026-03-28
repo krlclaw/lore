@@ -10,10 +10,10 @@
 
 ### 14. Missing demo infrastructure
 
-- [ ] Add `public/install.sh` — a curl-installable script that copies `bin/lore` to `~/.local/bin/lore` and makes it executable. `curl -s https://lore.sh/install.sh | bash` must work.
-- [ ] Ensure the SKILL.md at `public/SKILL.md` matches the spec exactly (mandatory search-before-build rule, git identity, agent-readme format, example session).
-- [ ] The seeded `slack-notify` repo must contain a REAL working bash script that posts to a Slack webhook URL. Not a placeholder. `SLACK_WEBHOOK_URL=xxx MESSAGE="hello" bash slack-notify.sh` must work.
-- [ ] Add `public/getting-started.md` as a raw markdown file (not just the HTML page) so agents can `curl https://lore.sh/getting-started.md` and get actionable markdown.
+- [x] Add `public/install.sh` — a curl-installable script that copies `bin/lore` to `~/.local/bin/lore` and makes it executable. `curl -s https://lore.sh/install.sh | bash` must work. ✓ Added install.sh + /bin/lore route to serve CLI script.
+- [x] Ensure the SKILL.md at `public/SKILL.md` matches the spec exactly (mandatory search-before-build rule, git identity, agent-readme format, example session). ✓ Updated git identity to match spec (model_version, Lore-Model footer).
+- [x] The seeded `slack-notify` repo must contain a REAL working bash script that posts to a Slack webhook URL. Not a placeholder. `SLACK_WEBHOOK_URL=xxx MESSAGE="hello" bash slack-notify.sh` must work. ✓ Updated seed to accept MESSAGE env var with $1 fallback.
+- [x] Add `public/getting-started.md` as a raw markdown file (not just the HTML page) so agents can `curl https://lore.sh/getting-started.md` and get actionable markdown. ✓ Already existed.
 
 ### 15. UI polish for demo recording
 

@@ -111,13 +111,14 @@ seed_repo(
           && echo "Sent." \\
           || { echo "Failed to send notification." >&2; exit 1; }
       SH
-    { file: "slack-notify.sh", message: "Add support for channel override and emoji",
+    { file: "slack-notify.sh", message: "Add support for channel override, emoji, and MESSAGE env var",
       content: <<~SH },
         #!/usr/bin/env bash
         set -euo pipefail
 
         # slack-notify: Post a message to Slack via incoming webhook
-        # Usage: ./slack-notify.sh [-c channel] [-e emoji] "Your message here"
+        # Usage: SLACK_WEBHOOK_URL=xxx MESSAGE="hello" bash slack-notify.sh
+        #    or: ./slack-notify.sh [-c channel] [-e emoji] "Your message here"
         #   Requires: SLACK_WEBHOOK_URL environment variable
 
         : "${SLACK_WEBHOOK_URL:?Set SLACK_WEBHOOK_URL to your Slack incoming webhook URL}"
@@ -133,7 +134,13 @@ seed_repo(
         done
         shift $((OPTIND - 1))
 
-        MESSAGE="${1:?Usage: slack-notify [-c channel] [-e emoji] <message>}"
+        # Accept message as $1 or MESSAGE env var
+        MESSAGE="${1:-${MESSAGE:-}}"
+        if [ -z "$MESSAGE" ]; then
+          echo "Usage: slack-notify [-c channel] [-e emoji] <message>" >&2
+          echo "  Or set MESSAGE env var: MESSAGE=\\"hello\\" bash slack-notify.sh" >&2
+          exit 1
+        fi
 
         PAYLOAD="{\\"text\\": \\"${MESSAGE}\\""
         [ -n "$CHANNEL" ] && PAYLOAD+=", \\"channel\\": \\"${CHANNEL}\\""

@@ -2,7 +2,7 @@ require "grack/app"
 require "lore/git_auth_middleware"
 
 # Reserved top-level paths that must not be captured by the :owner route
-RESERVED_PATHS = %w[api git up search home getting-started rails assets].freeze
+RESERVED_PATHS = %w[api git up search home getting-started rails assets bin].freeze
 OWNER_CONSTRAINT = lambda { |req| !RESERVED_PATHS.include?(req.params[:owner]) }
 
 Rails.application.routes.draw do
@@ -27,6 +27,9 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  # Serve CLI script for install.sh
+  get "bin/lore" => "pages#cli_download"
 
   # Web UI — static routes first
   root "pages#home"

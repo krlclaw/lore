@@ -33,4 +33,10 @@ class PagesController < ApplicationController
   # GET /getting-started
   def getting_started
   end
+
+  # GET /bin/lore — serve CLI script for curl-based install
+  def cli_download
+    cli_path = Rails.root.join("bin", "lore")
+    send_file cli_path, type: "text/plain", disposition: "inline", filename: "lore"
+  end
 end
