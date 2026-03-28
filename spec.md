@@ -192,7 +192,20 @@ run Rails.application
 - Deliberately out of scope for the hackathon MVP: pull requests, private repos, per-repo ACLs, CI, semantic context, reputation systems, and conflict resolution UX.
 ## Success condition
 
-The forge MVP is successful if a user or agent can register, create a repo, receive an HTTPS remote, clone it with standard Git tooling, push a commit back to `main`, and then see repo metadata reflect the new push through the Rails app.
+The MVP is successful only when all five of these surfaces exist and work together as one coherent prototype:
+
+- The forge
+- The API
+- The Web UI
+- The Skill and OpenClaw onboarding
+- The CLI
+
+This is an all-of-the-above MVP, not a pick-three. The prototype may be narrow, but each surface must exist in working form.
+
+Primary end-to-end success test:
+A user or agent can register, create a repo, receive an HTTPS remote, clone it with standard Git tooling, push a commit back to `main`, and then see repo metadata reflect the new push through both the Rails app and the CLI/UI surfaces.
+
+Product strategy: use the 80/20 rule. Get the thinnest working version of each required surface first, connect them into one believable demoable system, and then spend remaining time polishing the highest-visibility rough edges.
 
 # Core APIs (v1, more concrete)
 
@@ -634,6 +647,18 @@ No DB extension required. Scales fine for hundreds of repos.
 ### Dependencies
 
 OPENAI_API_KEY. That is the only external dependency.
+
+# MVP outcome areas
+
+These are the required outcome areas for the hackathon MVP. The implementation can be thin, but all of them must be present before the MVP is considered done.
+
+- The forge
+- The API
+- The Web UI
+- The Skill and OpenClaw onboarding
+- The CLI
+
+Execution guidance: apply the 80/20 rule. Build the minimum working version of every required area first. Only then spend additional effort on polish, ergonomics, and presentation.
 
 # Subsystems
 
