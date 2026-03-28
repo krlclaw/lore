@@ -23,7 +23,7 @@
 - [x] Improve homepage design: hero section with the Lore narrative, featured repos grid, recent activity.
 - [ ] Add dark/light theme that feels intentional (not default Rails).
 - [ ] Search page: instant-feeling results, search-as-you-type or fast form submit, highlighted matching terms.
-- [ ] Repo page: show README content rendered as HTML (parse from bare git repo), prominent clone command with copy button.
+- [x] Repo page: show README content rendered as HTML (parse from bare git repo), prominent clone command with copy button.
 - [ ] Owner page: avatar/identity section, contribution activity, list of repos with stats.
 - [x] Add a global footer with links and branding.
 - [ ] Add favicon and meta tags for social sharing (og:title, og:description, og:image).
