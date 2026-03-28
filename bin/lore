@@ -47,6 +47,17 @@ err()   { echo -e "${RED}Error:${RESET} $*" >&2; }
 # ── Commands ──
 
 cmd_register() {
+  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo -e "Usage: ${CYAN}lore register${RESET} ${DIM}<username>${RESET}"
+    echo ""
+    echo "  Create an account on the Lore forge and save your token locally."
+    echo ""
+    echo "  Examples:"
+    echo -e "    ${CYAN}lore register myagent${RESET}"
+    echo -e "    ${CYAN}LORE_HOST=https://lore.sh lore register myagent${RESET}"
+    return
+  fi
+
   local username="${1:-}"
   if [[ -z "$username" ]]; then
     echo -e "Usage: ${CYAN}lore register${RESET} ${DIM}<username>${RESET}" >&2
@@ -54,6 +65,13 @@ cmd_register() {
   fi
 
   load_config
+
+  # Validate server is reachable
+  if ! curl -sf --connect-timeout 5 "$LORE_HOST/" > /dev/null 2>&1; then
+    err "cannot reach Lore server at ${BOLD}$LORE_HOST${RESET}"
+    echo -e "  ${DIM}Set LORE_HOST to the correct URL, or check that the server is running.${RESET}" >&2
+    exit 1
+  fi
 
   local resp
   resp=$(curl -sf -X POST "$LORE_HOST/api/users" \
@@ -105,6 +123,19 @@ EOF
 }
 
 cmd_search() {
+  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo -e "Usage: ${CYAN}lore search${RESET} ${DIM}<query>${RESET}"
+    echo ""
+    echo "  Semantic search for tools and repos on the Lore forge."
+    echo "  Returns top 10 results sorted by similarity."
+    echo ""
+    echo "  Examples:"
+    echo -e "    ${CYAN}lore search \"send slack notification\"${RESET}"
+    echo -e "    ${CYAN}lore search \"read a URL\"${RESET}"
+    echo -e "    ${CYAN}lore search \"summarize git history\"${RESET}"
+    return
+  fi
+
   local query="${*}"
   if [[ -z "$query" ]]; then
     echo -e "Usage: ${CYAN}lore search${RESET} ${DIM}<query>${RESET}" >&2
@@ -127,11 +158,12 @@ cmd_search() {
     dim   = STDOUT.tty? ? "\033[2m"  : ""
     cyan  = STDOUT.tty? ? "\033[36m" : ""
     yel   = STDOUT.tty? ? "\033[33m" : ""
-    green = STDOUT.tty? ? "\033[32m" : ""
     reset = STDOUT.tty? ? "\033[0m"  : ""
 
     data  = JSON.parse(STDIN.read)
-    repos = data["repos"]
+    repos = data["repos"] || []
+    repos = repos.first(10)
+
     if repos.empty?
       puts "#{dim}No results found.#{reset}"
       exit
@@ -140,33 +172,31 @@ cmd_search() {
     puts ""
     repos.each_with_index do |r, i|
       stars = r["stars"] || 0
-      score = ((r["similarity_score"] || 0) * 100).round(1)
       name  = "#{r["owner"]}/#{r["name"]}"
+      desc  = r["description"] || ""
 
-      # Line 1: rank, name, stars, score
-      rank = "#{dim}#{(i + 1).to_s.rjust(2)}.#{reset}"
-      star_s = stars > 0 ? " #{yel}\u2605 #{stars}#{reset}" : ""
-      score_s = " #{dim}#{score}% match#{reset}"
-      puts "#{rank} #{bold}#{cyan}#{name}#{reset}#{star_s}#{score_s}"
+      rank = "#{(i + 1).to_s.rjust(2)}."
+      star_s = " #{yel}\u2B50#{stars}#{reset}"
+      desc_s = desc.empty? ? "" : " — #{desc}"
 
-      # Line 2: description
-      if r["description"] && !r["description"].empty?
-        puts "      #{dim}#{r["description"]}#{reset}"
-      end
-
-      # Line 3: tags
-      tags = r["tags"] || []
-      if tags.any?
-        tag_s = tags.map { |t| "#{green}#{t}#{reset}" }.join(" ")
-        puts "      #{tag_s}"
-      end
-      puts "" if i < repos.length - 1
+      puts "  #{dim}#{rank}#{reset} #{bold}#{cyan}#{name}#{reset}#{star_s}#{desc_s}"
     end
     puts ""
   '
 }
 
 cmd_clone() {
+  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo -e "Usage: ${CYAN}lore clone${RESET} ${DIM}<owner/repo>${RESET}"
+    echo ""
+    echo "  Clone a repo from Lore and auto-star it."
+    echo ""
+    echo "  Examples:"
+    echo -e "    ${CYAN}lore clone lore-agent/slack-notify${RESET}"
+    echo -e "    ${CYAN}lore clone agentsmith/fetch-url${RESET}"
+    return
+  fi
+
   local repo_path="${1:-}"
   if [[ -z "$repo_path" ]]; then
     echo -e "Usage: ${CYAN}lore clone${RESET} ${DIM}<owner/repo>${RESET}" >&2
@@ -185,25 +215,36 @@ cmd_clone() {
   fi
 
   local clone_url="$LORE_HOST/git/$owner/$repo.git"
-  info "Cloning ${BOLD}${CYAN}$owner/$repo${RESET}..."
   git clone "$clone_url" "$repo" || {
     err "clone failed."
     exit 1
   }
 
   # Auto-star if authenticated
+  local starred=""
   if [[ -n "${LORE_TOKEN:-}" ]]; then
-    curl -sf -X POST "$LORE_HOST/api/repos/$owner/$repo/star" \
-      -H "Authorization: Bearer $LORE_TOKEN" > /dev/null 2>&1 && \
-      info "Starred ${YELLOW}$owner/$repo${RESET}" || true
+    if curl -sf -X POST "$LORE_HOST/api/repos/$owner/$repo/star" \
+      -H "Authorization: Bearer $LORE_TOKEN" > /dev/null 2>&1; then
+      starred=" and starred"
+    fi
   fi
 
-  echo ""
-  echo -e "  ${DIM}cd $repo && start hacking${RESET}"
+  info "Cloned${starred} ${BOLD}${CYAN}$owner/$repo${RESET}"
   echo ""
 }
 
 cmd_publish() {
+  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo -e "Usage: ${CYAN}lore publish${RESET} ${DIM}<name> [description] [--tags tag1,tag2]${RESET}"
+    echo ""
+    echo "  Create a new repo on Lore and push the current directory."
+    echo ""
+    echo "  Examples:"
+    echo -e "    ${CYAN}lore publish my-tool \"A useful tool\" --tags cli,automation${RESET}"
+    echo -e "    ${CYAN}lore publish slack-notify \"Posts to Slack webhooks\"${RESET}"
+    return
+  fi
+
   local name="${1:-}"
   local description="${2:-}"
   local tags_str="${3:-}"
@@ -253,13 +294,51 @@ cmd_publish() {
 }
 
 cmd_push() {
+  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo -e "Usage: ${CYAN}lore push${RESET}"
+    echo ""
+    echo "  Pull with rebase, then push to origin main."
+    echo "  Must be run from inside a cloned Lore repo."
+    echo ""
+    echo "  Examples:"
+    echo -e "    ${CYAN}cd my-tool && lore push${RESET}"
+    return
+  fi
+
   ensure_auth
 
   # Build authenticated URL for push
   local origin_url
-  origin_url=$(git remote get-url origin 2>/dev/null)
+  origin_url=$(git remote get-url origin 2>/dev/null || true)
+
   if [[ -z "$origin_url" ]]; then
-    err "no git remote 'origin' found. Are you in a cloned repo?"
+    # Try to detect repo info from current directory and set up remote
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+      err "not in a git repository."
+      exit 1
+    fi
+
+    # Try to infer owner/repo from the directory name and config
+    local repo_name
+    repo_name=$(basename "$(pwd)")
+    if [[ -n "${LORE_USERNAME:-}" ]]; then
+      warn "No remote 'origin' found. Setting up Lore remote..."
+      origin_url="$LORE_HOST/git/$LORE_USERNAME/$repo_name.git"
+      git remote add origin "$origin_url"
+      info "Added remote: ${DIM}$origin_url${RESET}"
+    else
+      err "no git remote 'origin' found and no username configured."
+      echo -e "  ${DIM}Either clone via${RESET} ${CYAN}lore clone <owner/repo>${RESET} ${DIM}or add a remote manually:${RESET}" >&2
+      echo -e "  ${CYAN}git remote add origin $LORE_HOST/git/<owner>/<repo>.git${RESET}" >&2
+      exit 1
+    fi
+  fi
+
+  # If the origin URL is not a Lore URL, warn and try to detect
+  if [[ "$origin_url" != *"$LORE_HOST"* && "$origin_url" != *"lore"* ]]; then
+    warn "Origin URL doesn't appear to be a Lore remote: $origin_url"
+    echo -e "  ${DIM}If this repo was cloned via git instead of lore clone, set the remote:${RESET}" >&2
+    echo -e "  ${CYAN}git remote set-url origin $LORE_HOST/git/<owner>/<repo>.git${RESET}" >&2
     exit 1
   fi
 
@@ -284,6 +363,13 @@ cmd_push() {
 }
 
 cmd_whoami() {
+  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo -e "Usage: ${CYAN}lore whoami${RESET}"
+    echo ""
+    echo "  Show current identity: username, token, and host."
+    return
+  fi
+
   ensure_auth
 
   local masked_token="${LORE_TOKEN:0:12}...${LORE_TOKEN: -4}"
@@ -295,6 +381,16 @@ cmd_whoami() {
 }
 
 cmd_star() {
+  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo -e "Usage: ${CYAN}lore star${RESET} ${DIM}<owner/repo>${RESET}"
+    echo ""
+    echo "  Star a repo on the Lore forge."
+    echo ""
+    echo "  Examples:"
+    echo -e "    ${CYAN}lore star lore-agent/slack-notify${RESET}"
+    return
+  fi
+
   local repo_path="${1:-}"
   if [[ -z "$repo_path" ]]; then
     echo -e "Usage: ${CYAN}lore star${RESET} ${DIM}<owner/repo>${RESET}" >&2
@@ -327,6 +423,7 @@ cmd_help() {
   echo -e "  ${CYAN}star${RESET}     ${DIM}<owner/repo>${RESET}         Star a repo"
   echo -e "  ${CYAN}whoami${RESET}                          Show current identity"
   echo ""
+  echo -e "  ${DIM}Run any command with --help for usage examples.${RESET}"
   echo -e "  ${DIM}Config: ~/.lore/config${RESET}"
   echo ""
 }

@@ -33,11 +33,11 @@ The current UI is functional but safe. It needs personality and polish to look l
 
 ### 16. CLI hardening
 
-- [ ] `lore search` output must match spec exactly: numbered results, `owner/repo ⭐N — description` format, top 10.
-- [ ] `lore clone` must auto-star and print confirmation: "Cloned and starred owner/repo".
-- [ ] `lore push` must handle the case where the remote isn't set (cloned via git instead of lore clone).
-- [ ] `lore register` should validate the server is reachable before attempting registration.
-- [ ] All CLI commands should have `--help` with usage examples.
+- [x] `lore search` output must match spec exactly: numbered results, `owner/repo ⭐N — description` format, top 10. ✓ Single-line format matching spec, capped at 10 results.
+- [x] `lore clone` must auto-star and print confirmation: "Cloned and starred owner/repo". ✓ Prints "Cloned and starred owner/repo" on success.
+- [x] `lore push` must handle the case where the remote isn't set (cloned via git instead of lore clone). ✓ Auto-sets remote from LORE_USERNAME + dir name, warns if non-Lore URL.
+- [x] `lore register` should validate the server is reachable before attempting registration. ✓ Checks connectivity with 5s timeout before API call.
+- [x] All CLI commands should have `--help` with usage examples. ✓ Every command supports --help with examples.
 
 ### 17. Git transport edge cases
 
