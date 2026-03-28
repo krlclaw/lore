@@ -8,7 +8,7 @@ require "tmpdir"
 
 # ---------- helpers ----------
 
-def seed_repo(owner:, name:, description:, tags:, readme:, stars_from: [])
+def seed_repo(owner:, name:, description:, tags:, readme:, stars_from: [], display_stars: nil)
   return if Repo.exists?(owner: owner, name: name)
 
   puts "  Creating #{owner.username}/#{name}..."
@@ -35,7 +35,12 @@ def seed_repo(owner:, name:, description:, tags:, readme:, stars_from: [])
 
   stars_from.each { |u| Star.find_or_create_by!(user: u, repo: repo) }
 
-  puts "    ✓ #{owner.username}/#{name} (#{tags.join(', ')})"
+  # Override stars_count for demo-realistic numbers
+  if display_stars
+    repo.update_column(:stars_count, display_stars)
+  end
+
+  puts "    ✓ #{owner.username}/#{name} (#{tags.join(', ')}) ⭐#{repo.stars_count}"
   repo
 end
 
@@ -57,6 +62,7 @@ seed_repo(
   description: "Send Slack notifications via incoming webhooks. Simple, reliable, agent-friendly.",
   tags: %w[slack notification webhook messaging agent-tool],
   stars_from: [devtools, agentkit],
+  display_stars: 34,
   readme: <<~MD
     # slack-notify
 
@@ -97,6 +103,7 @@ seed_repo(
   description: "Create GitHub issues from structured input. Supports labels, assignees, and templates.",
   tags: %w[github issues automation agent-tool api],
   stars_from: [devtools],
+  display_stars: 12,
   readme: <<~MD
     # github-issue-creator
 
@@ -127,6 +134,7 @@ seed_repo(
   description: "Pretty-print and validate JSON from stdin or files. Supports color output and jq-style filtering.",
   tags: %w[json formatting cli utility developer-tools],
   stars_from: [lore_agent],
+  display_stars: 8,
   readme: <<~MD
     # json-formatter
 
@@ -158,6 +166,7 @@ seed_repo(
   description: "Verify that required environment variables are set before running a command. Fail fast with clear errors.",
   tags: %w[environment validation cli devops agent-tool],
   stars_from: [lore_agent, agentkit],
+  display_stars: 18,
   readme: <<~MD
     # env-checker
 
@@ -183,6 +192,7 @@ seed_repo(
   description: "Fetch and extract text content from web pages. Returns clean markdown suitable for LLM consumption.",
   tags: %w[web scraping http markdown agent-tool],
   stars_from: [lore_agent, devtools],
+  display_stars: 15,
   readme: <<~MD
     # web-scraper
 
@@ -212,6 +222,7 @@ seed_repo(
   name: "file-search",
   description: "Search files by name pattern and content regex across a directory tree. Fast, agent-optimized output.",
   tags: %w[search files grep find cli agent-tool],
+  display_stars: 6,
   readme: <<~MD
     # file-search
 

@@ -59,6 +59,7 @@ module Api
     def star
       repo = find_repo!
       Star.find_or_create_by!(user: current_user, repo: repo)
+      repo.reload
       render json: {
         repo: { owner: repo.owner.username, name: repo.name, stars: repo.stars_count },
         starred: true
@@ -71,6 +72,7 @@ module Api
     def unstar
       repo = find_repo!
       Star.find_by(user: current_user, repo: repo)&.destroy
+      repo.reload
       render json: {
         repo: { owner: repo.owner.username, name: repo.name, stars: repo.stars_count },
         starred: false

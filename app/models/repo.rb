@@ -21,9 +21,8 @@ class Repo < ApplicationRecord
     super(value.is_a?(String) ? value : value.to_json)
   end
 
-  def stars_count
-    stars.count
-  end
+  # stars_count is a counter-cached column maintained by Rails.
+  # For seed/demo repos, it can be overridden to a higher value.
 
   # Build the text used for embedding: name + description + tags
   def embedding_input
