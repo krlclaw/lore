@@ -52,6 +52,12 @@
 [data-theme="light"] .copy-btn {
   color: #fff;
 }
+[data-theme="light"] .star-stat {
+  color: var(--star-gold);
+}
+[data-theme="light"] .loop-icon {
+  color: var(--accent);
+}
 
 html { font-size: 16px; }
 body {
@@ -229,26 +235,28 @@ a:hover { color: var(--text-bright); }
   border-color: var(--accent-dim);
   transform: translateY(-2px);
 }
-.loop-icon { font-size: 1.1rem; }
+.loop-icon { font-size: 1.1rem; color: var(--accent); display: flex; align-items: center; justify-content: center; }
 .loop-label {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--text-dim);
 }
 .loop-connector {
-  width: 32px;
+  width: 36px;
   height: 2px;
-  background: linear-gradient(90deg, var(--border), var(--accent-dim));
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
   flex-shrink: 0;
+  opacity: 0.5;
 }
 
 /* ── Search box ── */
 .search-form { position: relative; max-width: 560px; margin: 0 auto 2.5rem; }
 .hero-search { max-width: 640px; }
 .hero-search .search-input {
-  padding: 1.1rem 1.4rem;
-  padding-right: 6rem;
-  font-size: 1.05rem;
+  padding: 1.2rem 1.5rem;
+  padding-right: 6.5rem;
+  font-size: 1.1rem;
+  border-width: 2px;
 }
 .hero-search .search-btn {
   padding: 0.65rem 1.3rem;
@@ -270,7 +278,14 @@ a:hover { color: var(--text-bright); }
 .search-input::placeholder { color: var(--text-dim); }
 .search-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(78,205,196,.15), 0 0 20px rgba(78,205,196,.08), 0 4px 24px rgba(0,0,0,.2);
+  box-shadow: 0 0 0 4px rgba(78,205,196,.15), 0 0 30px rgba(78,205,196,.12), 0 4px 24px rgba(0,0,0,.2);
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(78,205,196,.1), 0 0 20px rgba(78,205,196,.06); }
+  50% { box-shadow: 0 0 0 4px rgba(78,205,196,.18), 0 0 30px rgba(78,205,196,.12); }
+}
+.hero-search .search-input:not(:focus) {
+  animation: pulseGlow 3s ease-in-out infinite;
 }
 .search-btn {
   position: absolute;
@@ -391,7 +406,7 @@ a:hover { color: var(--text-bright); }
   color: var(--accent);
   font-size: 1rem;
 }
-.repo-desc { color: var(--text); font-size: 0.9rem; line-height: 1.45; margin-bottom: 0.6rem; }
+.repo-desc { color: var(--text); font-size: 0.9rem; line-height: 1.35; margin-bottom: 0.6rem; }
 .repo-meta { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
 .repo-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
 .tag {
@@ -404,20 +419,21 @@ a:hover { color: var(--text-bright); }
   border: 1px solid transparent;
   transition: background .15s, border-color .15s, color .15s;
 }
-.repo-card:hover .tag {
+.tag:hover, .repo-card:hover .tag {
   border-color: var(--accent-dim);
-  background: rgba(78,205,196,.12);
+  background: rgba(78,205,196,.15);
+  color: var(--accent);
 }
 .repo-stat {
   font-size: 0.8rem;
   color: var(--text-dim);
   font-family: var(--font-mono);
 }
-.repo-stat .star-icon { color: var(--star-gold); font-size: 0.95rem; }
+.repo-stat .star-icon { color: var(--star-gold); font-size: 1rem; }
 .star-stat {
-  color: var(--text);
-  font-weight: 500;
-  font-size: 0.85rem;
+  color: var(--star-gold);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 .score-badge {
   position: relative;
@@ -514,8 +530,9 @@ a:hover { color: var(--text-bright); }
   font-size: 0.9rem;
   color: var(--accent);
   background: var(--bg);
-  padding: 0.6rem 0.8rem;
+  padding: 0.7rem 0.9rem;
   border-radius: 6px;
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -525,15 +542,17 @@ a:hover { color: var(--text-bright); }
   background: var(--accent);
   border: 1px solid var(--accent);
   color: var(--bg);
-  padding: 0.35rem 0.7rem;
+  padding: 0.4rem 0.85rem;
   border-radius: 4px;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
   flex-shrink: 0;
   margin-left: 0.75rem;
   transition: background .15s, transform .1s;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 .copy-btn:hover { background: var(--accent-dim); transform: scale(1.05); }
 .detail-meta {

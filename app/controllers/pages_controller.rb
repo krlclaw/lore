@@ -9,7 +9,7 @@ class PagesController < ApplicationController
     ).limit(6)
     @repo_count = Repo.count
     @user_count = User.count
-    @star_count = Star.count
+    @star_count = Repo.sum(:stars_count)
   end
 
   # GET /search
