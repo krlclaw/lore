@@ -37,7 +37,7 @@
 - [x] Implement repo search API returning ranked results with similarity scores.
 - [x] Add embedding generation/storage for `name + description + tags`.
 - [x] Implement star/unstar flows and star counts.
-- [ ] Ensure the seeded `slack-notify` repo is top-ranked for demo-critical queries.
+- [x] Ensure the seeded `slack-notify` repo is top-ranked for demo-critical queries.
 
 ### 5. Minimal web UI
 
@@ -57,9 +57,9 @@
 
 ### 7. Demo fixtures + end-to-end validation
 
-- [ ] Seed working demo repos with realistic metadata, commits, and agent-readable READMEs.
-- [ ] Add focused tests for API behavior, repo creation, auth, and search ranking.
-- [ ] Add an end-to-end demo validation path covering register/create/clone/push/metadata refresh.
+- [x] Seed working demo repos with realistic metadata, commits, and agent-readable READMEs.
+- [x] Add focused tests for API behavior, repo creation, auth, and search ranking.
+- [x] Add an end-to-end demo validation path covering register/create/clone/push/metadata refresh.
 - [ ] Validate the exact filmed scenario for Slack search/clone/use/push.
 
 ## Known design constraints
@@ -70,4 +70,5 @@
 
 ## Next recommended increment
 
-- Seed demo repos and run end-to-end validation of the full demo flow.
+- Validate the exact filmed scenario for Slack search/clone/use/push.
+- Add minimal project documentation for setup/run/test.
